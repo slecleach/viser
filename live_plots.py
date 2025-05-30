@@ -47,7 +47,9 @@ def create_wave_plot(t: float, wave_type: str = "sin") -> go.Figure:
 def main() -> None:
     server = viser.ViserServer()
 
-    time_step = 0.1
+    Nfull = 20
+    Nupdate = 300
+    time_step = 0.3
 
     # Create two plots
     time_value = 0.0
@@ -55,19 +57,19 @@ def main() -> None:
     cos_plot_handle = server.gui.add_plotly(figure=create_wave_plot(time_value, "cos"))
 
     # while True:
-    for i in range(50):
-        print("i", i, "of", 100)
+    for i in range(Nfull):
+        print("i", i, "of", Nfull)
         sin_plot_handle.figure = create_wave_plot(time_value, "sin")
         cos_plot_handle.figure = create_wave_plot(time_value, "cos")
 
         time.sleep(time_step)
         time_value += time_step
 
-    for i in range(5):
+    for i in range(Nupdate):
         sin_plot_update_handle = server.gui.update_plotly(
             handle=sin_plot_handle,
-            new_x_data = 12.0,
-            new_y_data = -12.0,
+            new_x_data = time_value,
+            new_y_data = -12.0 + np.sin(time_value),
         )
         time.sleep(time_step)
         time_value += time_step

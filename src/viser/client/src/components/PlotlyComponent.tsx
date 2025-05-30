@@ -32,10 +32,12 @@ const PlotWithAspect = React.memo(function PlotWithAspect({
   jsonStr,
   aspectRatio,
   staticPlot,
+  uuid, // Add this prop to receive the UUID
 }: {
   jsonStr: string;
   aspectRatio: number;
   staticPlot: boolean;
+  uuid: string; // Add this type
 }) {
   // Catch if the jsonStr is empty; if so, render an empty div.
   if (jsonStr === "") return <div></div>;
@@ -68,6 +70,12 @@ const PlotWithAspect = React.memo(function PlotWithAspect({
   // based on https://github.com/plotly/react-plotly.js/issues/242.
   const plotRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
+    // Set the ID of the plot element to match the UUID
+    if (plotRef.current) {
+      plotRef.current.id = uuid;
+      console.log("Setting plot element ID to:", uuid);
+    }
+    
     // @ts-ignore - Plotly.js is dynamically imported with an eval() call.
     Plotly.react(
       plotRef.current!,
@@ -75,7 +83,8 @@ const PlotWithAspect = React.memo(function PlotWithAspect({
       plotJson.layout,
       plotJson.config,
     );
-  }, [plotJson]);
+  }, [plotJson, uuid]); // Add uuid to dependencies
+
 
   return (
     <Paper
@@ -84,7 +93,7 @@ const PlotWithAspect = React.memo(function PlotWithAspect({
       withBorder
       style={{ position: "relative" }}
     >
-      <div ref={plotRef} />
+      <div ref={plotRef} id={uuid} /> {/* Add id here too */}
       {/* Add a div on top of the plot, to prevent interaction + cursor changes. */}
       {staticPlot ? (
         <div
@@ -104,13 +113,14 @@ const PlotWithAspect = React.memo(function PlotWithAspect({
 
 export default function PlotlyComponent({
   props: { visible, _plotly_json_str: plotly_json_str, aspect },
+  uuid, // Add this to get the component's UUID
 }: GuiPlotlyMessage) {
   // Add logging before the visibility check
-  console.log("%c[PlotlyComponent] Rendering", "color: #FF5722; font-weight: bold; font-size: 14px", {
-    visible,
-    hasPlotlyData: !!plotly_json_str,
-    aspect
-  });
+  // console.log("%c[PlotlyComponent] Rendering", "color: #FF5722; font-weight: bold; font-size: 14px", {
+  //   visible,
+  //   hasPlotlyData: !!plotly_json_str,
+  //   aspect
+  // });
 
   if (!visible) return null;
 
@@ -121,16 +131,15 @@ export default function PlotlyComponent({
     visible
   });
 
-  // Print all UUIDs before trying to find the plot element
-  const allUuids = printAllUUIDs();
-  console.warn("PlotlyComponent: Available UUIDs:", allUuids);
+  // // Print all UUIDs before trying to find the plot element
+  // const allUuids = printAllUUIDs();
+  // console.warn("PlotlyComponent: Available UUIDs:", allUuids);
 
 
   // Create a modal with the plot, and a button to open it.
   const [opened, { open, close }] = useDisclosure(false);
   return (
     <Box>
-      {/* Draw static plot in the controlpanel, which can be clicked. */}
       <Tooltip.Floating zIndex={100} label={"Click to expand"}>
         <Box
           style={{
@@ -144,23 +153,22 @@ export default function PlotlyComponent({
             jsonStr={plotly_json_str}
             aspectRatio={aspect}
             staticPlot={true}
+            uuid={uuid} // Pass the UUID to PlotWithAspect
           />
         </Box>
       </Tooltip.Floating>
 
-      {/* Modal contents. keepMounted makes state changes (eg zoom) to the plot
-      persistent. */}
       <Modal opened={opened} onClose={close} size="xl" keepMounted>
         <PlotWithAspect
           jsonStr={plotly_json_str}
           aspectRatio={aspect}
           staticPlot={false}
+          uuid={uuid} // Pass the UUID here too
         />
       </Modal>
     </Box>
   );
 }
-
 
 // Component for handling plot updates
 export function PlotlyUpdateComponent({
@@ -168,22 +176,22 @@ export function PlotlyUpdateComponent({
 }: GuiPlotlyUpdateMessage) {
   // Use React hooks to update the plotly object when new data arrives
   React.useEffect(() => {
-    console.log("PlotlyUpdateComponent received update:", {
+    console.log("[PlotlyUpdateComponent] Received update:", {
       x_data,
       y_data,
       plotly_element_uuid,
       timestamp: new Date().toISOString()
     });
 
-    // Print all UUIDs before trying to find the plot element
-    const allUuids = printAllUUIDs();
-    console.warn("UPDATE: Looking for plot element with UUID:", plotly_element_uuid);
-    console.warn("UPDATE: Available UUIDs:", allUuids);
+    // // Print all UUIDs before trying to find the plot element
+    // const allUuids = printAllUUIDs();
+    // console.warn("UPDATE: Looking for plot element with UUID:", plotly_element_uuid);
+    // console.warn("UPDATE: Available UUIDs:", allUuids);
 
 
     // Find the plot element by its UUID
     const plotElement = document.getElementById(plotly_element_uuid);
-    console.log("Found plot element:", plotElement);
+    // console.log("Found plot element:", plotElement);
     
     if (!plotElement) {
       console.warn("Could not find plot element with UUID:", plotly_element_uuid);
@@ -200,9 +208,9 @@ export function PlotlyUpdateComponent({
           y: [[y_data]]
         },
         [0], // Update the first trace
-        1    // Keep only the last point
+        50    // Keep only the last point
       );
-      console.log("Successfully updated plot with new data point");
+      // console.log("Successfully updated plot with new data point");
     } catch (error) {
       console.error("Error updating plot:", error);
     }
