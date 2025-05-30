@@ -1014,17 +1014,17 @@ class GuiPlotlyMessage(_CreateGuiComponentMessage):
 
 @dataclasses.dataclass
 class GuiPlotlyUpdateProps:
-    plotly_element_uuid: str
-    """UUID of the plotly element to update. Synchronized automatically when assigned."""
     x_data: float
     """X-data for the plot. Synchronized automatically when assigned."""
     y_data: float
     """Y-data for the plot. Synchronized automatically when assigned."""
+    history_length: int
+    """History length for the plot. Synchronized automatically when assigned."""
+    plotly_element_uuid: str
+    """UUID of the plotly element to update. Synchronized automatically when assigned."""
 
 @dataclasses.dataclass
 class GuiPlotlyUpdateMessage(Message):
-
-# class GuiPlotlyUpdateMessage(_CreateGuiComponentMessage):
     container_uuid: str
     props: GuiPlotlyUpdateProps
 

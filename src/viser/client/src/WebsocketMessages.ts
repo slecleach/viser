@@ -480,11 +480,12 @@ export interface GuiPlotlyMessage {
  */
 export interface GuiPlotlyUpdateMessage {
   type: "GuiPlotlyUpdateMessage";
-  uuid: string;
+  // uuid: string;
   container_uuid: string;
   props: {
     x_data: number;
     y_data: number;
+    history_length: number;
     plotly_element_uuid: string;
   };
 }

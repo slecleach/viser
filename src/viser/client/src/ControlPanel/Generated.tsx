@@ -111,10 +111,8 @@ function GeneratedInput(props: { guiUuid: string }) {
     case "GuiHtmlMessage":
       return <HtmlComponent {...conf} />;
     case "GuiPlotlyMessage":
-      // console.log("%c[GeneratedInput] Rendering PlotlyComponent", "color: #2196F3; font-weight: bold", conf);
       return <PlotlyComponent {...conf} />;
     case "GuiPlotlyUpdateMessage":
-      // console.log("%c[GeneratedInput] Rendering PlotlyUpdateComponent", "color: #2196F3; font-weight: bold", conf);
       return <PlotlyUpdateComponent {...conf} />;
     case "GuiImageMessage":
       return <ImageComponent {...conf} />;

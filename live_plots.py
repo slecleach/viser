@@ -13,14 +13,16 @@ from viser import _messages
 from pathlib import Path
 from viser._gui_api import _apply_default_order
 
-# GuiPlotlyUpdateMessage
-# GuiPlotlyUpdateProps
-# GuiPlotlyUpdateHandle
+
+# handle the modal plot
+# handle multiple trajectories
+# handles number of elements in history
+# handle boundary ylims, xlims
 
 
 def create_wave_plot(t: float, wave_type: str = "sin") -> go.Figure:
     """Create a wave plot starting at time t."""
-    x_data = np.linspace(t, t + 6 * np.pi, 0)
+    x_data = np.linspace(t, t + 6 * np.pi, 50)
     if wave_type == "sin":
         y_data = np.sin(x_data) * 10
         title = "Sine Wave"
@@ -30,7 +32,26 @@ def create_wave_plot(t: float, wave_type: str = "sin") -> go.Figure:
 
     fig = go.Figure()
     fig.add_trace(
-        go.Scatter(x=list(x_data), y=list(y_data), mode="lines", name=wave_type)
+        go.Scatter(
+            x=list(x_data), 
+            y=list(y_data), 
+            mode="lines", 
+            line=dict(color="red", width=2),  # Thinner line
+            fill="tozeroy",
+            fillcolor="rgba(255, 0, 0, 0.2)",
+            name=wave_type,
+            )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=list(x_data), 
+            y=list(y_data), 
+            mode="lines", 
+            line=dict(color="blue", width=2),  # Thinner line
+            fill="tozeroy",
+            fillcolor="rgba(0, 0, 255, 0.2)",   
+            name=wave_type + "_2",
+        )
     )
 
     fig.update_layout(
@@ -70,11 +91,13 @@ def main() -> None:
 
     for i in range(Nupdate):
         t0 = time.time()
-        server.gui.update_plotly(
-            plotly_element_uuid=sin_plot_handle._impl.uuid,
+        server.gui.extend_traces_plotly(
             new_x_data = time_value,
             new_y_data = -12.0 + np.sin(time_value),
+            history_length=20 + i % 20,
+            plotly_element_uuid=sin_plot_handle._impl.uuid,
         )
+        print("history_length", 20 + i % 20)
         t1 = time.time()
         elapsed = t1 - t0
         print("elapsed", elapsed)

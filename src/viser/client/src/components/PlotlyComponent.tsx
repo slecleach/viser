@@ -175,13 +175,14 @@ export default function PlotlyComponent({
 
 // Component for handling plot updates
 export function PlotlyUpdateComponent({
-  props: { x_data, y_data, plotly_element_uuid },
+  props: { x_data, y_data, history_length, plotly_element_uuid },
 }: GuiPlotlyUpdateMessage) {
   // Use React hooks to update the plotly object when new data arrives
   React.useEffect(() => {
     console.log("[PlotlyUpdateComponent] Received update:", {
       x_data,
       y_data,
+      history_length,
       plotly_element_uuid,
       timestamp: new Date().toISOString()
     });
@@ -207,7 +208,7 @@ export function PlotlyUpdateComponent({
             y: [[y_data]]
           },
           [0], // Update the first trace
-          50    // Keep only the last point
+          150
         );
       } catch (error) {
         console.error("Error updating plot:", error);
