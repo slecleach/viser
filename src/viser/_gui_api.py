@@ -48,6 +48,7 @@ from ._gui_handles import (
     GuiMultiSliderHandle,
     GuiNumberHandle,
     GuiPlotlyHandle,
+    GuiPlotlyUpdateHandle,
     GuiProgressBarHandle,
     GuiRgbaHandle,
     GuiRgbHandle,
@@ -785,7 +786,84 @@ class GuiApi:
         # Set the plotly handle properties.
         handle.figure = figure
         handle.aspect = aspect
+
         return handle
+
+
+    def update_plotly(
+        self,
+        handle: GuiPlotlyHandle,
+        new_x_data: float,
+        new_y_data: float,
+    ) -> GuiPlotlyUpdateHandle:
+        """Update a Plotly figure in the GUI.
+
+        Args:
+            handle: Handle to the Plotly figure to update.
+            new_x_data: New x-data for the plot.
+            new_y_data: New y-data for the plot.
+        """
+
+        print("update_plotly")
+        # If plotly.min.js hasn't been sent to the client yet, the client won't be able
+        # to render the plot. Send this large file now! (~3MB)
+        if not self._setup_plotly_js:
+            # Check if plotly is installed.
+            try:
+                import plotly
+            except ImportError:
+                raise ImportError(
+                    "You must have the `plotly` package installed to use the Plotly GUI element."
+                )
+
+            # Check that plotly.min.js exists.
+            plotly_path = (
+                Path(plotly.__file__).parent / "package_data" / "plotly.min.js"
+            )
+            assert plotly_path.exists(), (
+                f"Could not find plotly.min.js at {plotly_path}."
+            )
+
+            # Send it over!
+            plotly_js = plotly_path.read_text(encoding="utf-8")
+            self._websock_interface.queue_message(
+                _messages.RunJavascriptMessage(source=plotly_js)
+            )
+
+            # Update the flag so we don't send it again.
+            self._setup_plotly_js = True
+
+        # After plotly.min.js has been sent, we can send the plotly figure.
+        # Empty string for `plotly_json_str` is a signal to the client to render nothing.
+        print("handle._impl.uuid", handle._impl.uuid)
+        plotly_element_uuid = handle._impl.uuid 
+       
+        message = _messages.GuiPlotlyUpdateMessage(
+            # uuid=plotly_element_uuid, #good
+            uuid=_make_uuid(), #good
+            container_uuid=self._get_container_uuid(), #good
+            props=_messages.GuiPlotlyUpdateProps(
+                x_data=new_x_data,
+                y_data=new_y_data,
+                plotly_element_uuid=plotly_element_uuid,
+            ),
+        )
+        self._websock_interface.queue_message(message)
+
+        handle = GuiPlotlyUpdateHandle(
+            _GuiHandleState(
+                message.uuid,
+                self,
+                value=None,
+                props=message.props,
+                parent_container_id=message.container_uuid,
+            ),
+            _plotly_element_uuid=plotly_element_uuid,
+            _x_data=new_x_data,
+            _y_data=new_y_data,
+        )
+        return handle
+
 
     def add_button(
         self,
