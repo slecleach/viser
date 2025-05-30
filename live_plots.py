@@ -20,7 +20,7 @@ from viser._gui_api import _apply_default_order
 
 def create_wave_plot(t: float, wave_type: str = "sin") -> go.Figure:
     """Create a wave plot starting at time t."""
-    x_data = np.linspace(t, t + 6 * np.pi, 50)
+    x_data = np.linspace(t, t + 6 * np.pi, 0)
     if wave_type == "sin":
         y_data = np.sin(x_data) * 10
         title = "Sine Wave"
@@ -49,8 +49,8 @@ def main() -> None:
     server = viser.ViserServer()
 
     Nfull = 20
-    Nupdate = 300
-    time_step = 0.3
+    Nupdate = 300000
+    time_step = 0.0001
 
     # Create two plots
     time_value = 0.0
@@ -69,41 +69,22 @@ def main() -> None:
 
 
     for i in range(Nupdate):
-        # sin_plot_update_handle = server.gui.update_plotly(
+        t0 = time.time()
         server.gui.update_plotly(
-            # handle=sin_plot_handle,
             plotly_element_uuid=sin_plot_handle._impl.uuid,
             new_x_data = time_value,
             new_y_data = -12.0 + np.sin(time_value),
         )
+        t1 = time.time()
+        elapsed = t1 - t0
+        print("elapsed", elapsed)
         time.sleep(time_step)
         time_value += time_step
-        print("time_value", time_value)
+        # print("time_value", time_value)
 
 
     input("Press Enter to continue...")
     
-    # while True:
-    #     sin_plot_handle.visible = True
-    #     cos_plot_handle.visible = False
-    #     time.sleep(0.5)
-    #     sin_plot_handle.visible = False
-    #     cos_plot_handle.visible = True
-    #     time.sleep(0.5)
-
-    # # Update loop
-    # while True:
-    #     t0 = time.time()
-    #     time_value += time_step
-    #     # the setter for the handle is called here, this triggers the update of the json string
-    #     # self._plotly_json_str = json_str
-    #     sin_plot_handle.figure = create_wave_plot(time_value, "sin")
-    #     cos_plot_handle.figure = create_wave_plot(time_value, "cos")
-
-    #     elapsed = time.time() - t0
-    #     time.sleep(max(0.0, time_step - elapsed))
-    #     print(f"Time step: {time_step}, elapsed: {elapsed}")
-
 
 if __name__ == "__main__":
     main()

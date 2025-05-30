@@ -33,11 +33,13 @@ const PlotWithAspect = React.memo(function PlotWithAspect({
   aspectRatio,
   staticPlot,
   uuid, // Add this prop to receive the UUID
+  isModal = false, // Add this prop to identify if this is the modal plot
 }: {
   jsonStr: string;
   aspectRatio: number;
   staticPlot: boolean;
-  uuid: string; // Add this type
+  uuid: string;
+  isModal?: boolean;
 }) {
   // Catch if the jsonStr is empty; if so, render an empty div.
   if (jsonStr === "") return <div></div>;
@@ -70,10 +72,11 @@ const PlotWithAspect = React.memo(function PlotWithAspect({
   // based on https://github.com/plotly/react-plotly.js/issues/242.
   const plotRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
-    // Set the ID of the plot element to match the UUID
+    // Set the ID of the plot element to match the UUID, with a suffix for modal
     if (plotRef.current) {
-      plotRef.current.id = uuid;
-      console.log("Setting plot element ID to:", uuid);
+      const elementId = isModal ? `${uuid}-modal` : uuid;
+      plotRef.current.id = elementId;
+      console.log("Setting plot element ID to:", elementId);
     }
     
     // @ts-ignore - Plotly.js is dynamically imported with an eval() call.
@@ -83,8 +86,7 @@ const PlotWithAspect = React.memo(function PlotWithAspect({
       plotJson.layout,
       plotJson.config,
     );
-  }, [plotJson, uuid]); // Add uuid to dependencies
-
+  }, [plotJson, uuid, isModal]); // Add isModal to dependencies
 
   return (
     <Paper
@@ -93,7 +95,7 @@ const PlotWithAspect = React.memo(function PlotWithAspect({
       withBorder
       style={{ position: "relative" }}
     >
-      <div ref={plotRef} id={uuid} /> {/* Add id here too */}
+      <div ref={plotRef} id={isModal ? `${uuid}-modal` : uuid} />
       {/* Add a div on top of the plot, to prevent interaction + cursor changes. */}
       {staticPlot ? (
         <div
@@ -163,7 +165,8 @@ export default function PlotlyComponent({
           jsonStr={plotly_json_str}
           aspectRatio={aspect}
           staticPlot={false}
-          uuid={uuid} // Pass the UUID here too
+          uuid={uuid}
+          isModal={true} // Add this prop to identify the modal plot
         />
       </Modal>
     </Box>
@@ -183,37 +186,36 @@ export function PlotlyUpdateComponent({
       timestamp: new Date().toISOString()
     });
 
-    // // Print all UUIDs before trying to find the plot element
-    // const allUuids = printAllUUIDs();
-    // console.warn("UPDATE: Looking for plot element with UUID:", plotly_element_uuid);
-    // console.warn("UPDATE: Available UUIDs:", allUuids);
-
-
-    // Find the plot element by its UUID
-    const plotElement = document.getElementById(plotly_element_uuid);
-    // console.log("Found plot element:", plotElement);
+    // Find both the main plot and modal plot elements
+    const mainPlotElement = document.getElementById(plotly_element_uuid);
+    const modalPlotElement = document.getElementById(`${plotly_element_uuid}-modal`);
     
-    if (!plotElement) {
-      console.warn("Could not find plot element with UUID:", plotly_element_uuid);
+    if (!mainPlotElement && !modalPlotElement) {
+      console.warn("Could not find any plot elements with UUID:", plotly_element_uuid);
       return;
     }
 
-    // Update the plot with new data
-    try {
-      // @ts-ignore - Plotly.js is dynamically imported
-      Plotly.extendTraces(
-        plotElement,
-        {
-          x: [[x_data]],
-          y: [[y_data]]
-        },
-        [0], // Update the first trace
-        50    // Keep only the last point
-      );
-      // console.log("Successfully updated plot with new data point");
-    } catch (error) {
-      console.error("Error updating plot:", error);
-    }
+    // Update both plots with new data
+    const updatePlot = (element: HTMLElement | null) => {
+      if (!element) return;
+      try {
+        // @ts-ignore - Plotly.js is dynamically imported
+        Plotly.extendTraces(
+          element,
+          {
+            x: [[x_data]],
+            y: [[y_data]]
+          },
+          [0], // Update the first trace
+          50    // Keep only the last point
+        );
+      } catch (error) {
+        console.error("Error updating plot:", error);
+      }
+    };
+
+    updatePlot(mainPlotElement);
+    updatePlot(modalPlotElement);
   }, [x_data, y_data, plotly_element_uuid]);
 
   // This component doesn't render anything visible
