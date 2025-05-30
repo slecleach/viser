@@ -1022,7 +1022,9 @@ class GuiPlotlyUpdateProps:
     """Y-data for the plot. Synchronized automatically when assigned."""
 
 @dataclasses.dataclass
-class GuiPlotlyUpdateMessage(_CreateGuiComponentMessage):
+class GuiPlotlyUpdateMessage(Message):
+
+# class GuiPlotlyUpdateMessage(_CreateGuiComponentMessage):
     container_uuid: str
     props: GuiPlotlyUpdateProps
 

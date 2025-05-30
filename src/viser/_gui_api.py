@@ -792,14 +792,17 @@ class GuiApi:
 
     def update_plotly(
         self,
-        handle: GuiPlotlyHandle,
+        # handle: GuiPlotlyHandle,
+        plotly_element_uuid: str,
         new_x_data: float,
         new_y_data: float,
-    ) -> GuiPlotlyUpdateHandle:
+    # ) -> GuiPlotlyUpdateHandle:
+    ) -> None:
         """Update a Plotly figure in the GUI.
 
         Args:
-            handle: Handle to the Plotly figure to update.
+            # handle: Handle to the Plotly figure to update.
+            plotly_element_uuid: uuid of the plotly element to update.
             new_x_data: New x-data for the plot.
             new_y_data: New y-data for the plot.
         """
@@ -835,12 +838,12 @@ class GuiApi:
 
         # After plotly.min.js has been sent, we can send the plotly figure.
         # Empty string for `plotly_json_str` is a signal to the client to render nothing.
-        print("handle._impl.uuid", handle._impl.uuid)
-        plotly_element_uuid = handle._impl.uuid 
+        # print("handle._impl.uuid", handle._impl.uuid)
+        # plotly_element_uuid = handle._impl.uuid 
        
         message = _messages.GuiPlotlyUpdateMessage(
             # uuid=plotly_element_uuid, #good
-            uuid=_make_uuid(), #good
+            # uuid=_make_uuid(), #good
             container_uuid=self._get_container_uuid(), #good
             props=_messages.GuiPlotlyUpdateProps(
                 x_data=new_x_data,
@@ -850,19 +853,20 @@ class GuiApi:
         )
         self._websock_interface.queue_message(message)
 
-        handle = GuiPlotlyUpdateHandle(
-            _GuiHandleState(
-                message.uuid,
-                self,
-                value=None,
-                props=message.props,
-                parent_container_id=message.container_uuid,
-            ),
-            _plotly_element_uuid=plotly_element_uuid,
-            _x_data=new_x_data,
-            _y_data=new_y_data,
-        )
-        return handle
+        return None
+        # handle = GuiPlotlyUpdateHandle(
+        #     _GuiHandleState(
+        #         # message.uuid,
+        #         self,
+        #         value=None,
+        #         props=message.props,
+        #         parent_container_id=message.container_uuid,
+        #     ),
+        #     _plotly_element_uuid=plotly_element_uuid,
+        #     _x_data=new_x_data,
+        #     _y_data=new_y_data,
+        # )
+        # return handle
 
 
     def add_button(

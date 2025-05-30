@@ -44,6 +44,7 @@ def create_wave_plot(t: float, wave_type: str = "sin") -> go.Figure:
     return fig
 
 
+
 def main() -> None:
     server = viser.ViserServer()
 
@@ -65,9 +66,13 @@ def main() -> None:
         time.sleep(time_step)
         time_value += time_step
 
+
+
     for i in range(Nupdate):
-        sin_plot_update_handle = server.gui.update_plotly(
-            handle=sin_plot_handle,
+        # sin_plot_update_handle = server.gui.update_plotly(
+        server.gui.update_plotly(
+            # handle=sin_plot_handle,
+            plotly_element_uuid=sin_plot_handle._impl.uuid,
             new_x_data = time_value,
             new_y_data = -12.0 + np.sin(time_value),
         )
