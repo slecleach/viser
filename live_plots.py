@@ -8,11 +8,6 @@ import numpy as np
 import plotly.graph_objects as go
 
 import viser
-from viser._gui_handles import GuiPlotlyHandle, _make_uuid, _GuiHandleState, GuiPlotlyUpdateHandle
-from viser import _messages
-from pathlib import Path
-from viser._gui_api import _apply_default_order
-
 
 # handle the modal plot
 # handle multiple trajectories
@@ -33,23 +28,23 @@ def create_wave_plot(t: float, wave_type: str = "sin") -> go.Figure:
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
-            x=list(x_data), 
-            y=list(y_data), 
-            mode="lines", 
+            x=list(x_data),
+            y=list(y_data),
+            mode="lines",
             line=dict(color="red", width=2),  # Thinner line
             fill="tozeroy",
             fillcolor="rgba(255, 0, 0, 0.2)",
             name=wave_type,
-            )
+        )
     )
     fig.add_trace(
         go.Scatter(
-            x=list(x_data), 
-            y=list(y_data), 
-            mode="lines", 
+            x=list(x_data),
+            y=list(y_data),
+            mode="lines",
             line=dict(color="blue", width=2),  # Thinner line
             fill="tozeroy",
-            fillcolor="rgba(0, 0, 255, 0.2)",   
+            fillcolor="rgba(0, 0, 255, 0.2)",
             name=wave_type + "_2",
         )
     )
@@ -63,7 +58,6 @@ def create_wave_plot(t: float, wave_type: str = "sin") -> go.Figure:
     )
 
     return fig
-
 
 
 def main() -> None:
@@ -87,14 +81,12 @@ def main() -> None:
         time.sleep(time_step)
         time_value += time_step
 
-
-
     for i in range(Nupdate):
         t0 = time.time()
         server.gui.plotly_extend_traces(
             plotly_element_uuid=sin_plot_handle._impl.uuid,
-            x_data = time_value,
-            y_data = -12.0 + np.sin(time_value),
+            x_data=time_value,
+            y_data=-12.0 + np.sin(time_value),
             history_length=20 + i % 20,
         )
         print("history_length", 150 + i % 150)
@@ -105,9 +97,8 @@ def main() -> None:
         time_value += time_step
         # print("time_value", time_value)
 
-
     input("Press Enter to continue...")
-    
+
 
 if __name__ == "__main__":
     main()

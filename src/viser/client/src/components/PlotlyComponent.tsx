@@ -13,7 +13,7 @@ function printAllUUIDs() {
   // Get all elements in the document
   const allElements = document.getElementsByTagName('*');
   const uuids: string[] = [];
-  
+
   // Loop through all elements and collect their IDs
   for (let i = 0; i < allElements.length; i++) {
     const element = allElements[i];
@@ -21,7 +21,7 @@ function printAllUUIDs() {
       uuids.push(element.id);
     }
   }
-  
+
   console.log("All UUIDs in the scene:", uuids);
   return uuids;
 }
@@ -71,7 +71,7 @@ const PlotWithAspect = React.memo(function PlotWithAspect({
     if (plotRef.current) {
       plotRef.current.id = uuid;
     }
-    
+
     // @ts-ignore - Plotly.js is dynamically imported with an eval() call.
     Plotly.react(
       plotRef.current!,
@@ -115,9 +115,13 @@ export default function PlotlyComponent({
   // Parse the JSON string once and maintain it as an object
   const [plotJson, setPlotJson] = React.useState(() => JSON.parse(plotly_json_str));
 
+  // Make a copy of the plotJson for modal plot
+  const [modalPlotJson, setModalPlotJson] = React.useState(() => JSON.parse(plotly_json_str));
+
   // Update plot data when new JSON string comes in
   React.useEffect(() => {
     setPlotJson(JSON.parse(plotly_json_str));
+    setModalPlotJson(JSON.parse(plotly_json_str));
   }, [plotly_json_str]);
 
   // Create a modal with the plot, and a button to open it.
@@ -144,7 +148,7 @@ export default function PlotlyComponent({
 
       <Modal opened={opened} onClose={close} size="xl" keepMounted>
         <PlotWithAspect
-          plotJson={plotJson}
+          plotJson={modalPlotJson}
           aspectRatio={aspect}
           staticPlot={false}
           uuid={`${uuid}-modal`}
@@ -163,7 +167,7 @@ export function PlotlyUpdateComponent({
     // Find both the main plot and modal plot elements
     const mainPlotElement = document.getElementById(plotly_element_uuid);
     const modalPlotElement = document.getElementById(`${plotly_element_uuid}-modal`);
-    
+
     if (!mainPlotElement && !modalPlotElement) {
       console.warn("Could not find any plot elements with UUID:", plotly_element_uuid);
       return;

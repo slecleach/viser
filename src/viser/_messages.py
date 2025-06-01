@@ -1011,7 +1011,6 @@ class GuiPlotlyMessage(_CreateGuiComponentMessage):
     props: GuiPlotlyProps
 
 
-
 @dataclasses.dataclass
 class GuiPlotlyUpdateProps:
     plotly_element_uuid: str
@@ -1023,11 +1022,11 @@ class GuiPlotlyUpdateProps:
     history_length: int
     """History length for the plot. Synchronized automatically when assigned."""
 
+
 @dataclasses.dataclass
 class GuiPlotlyUpdateMessage(Message):
     container_uuid: str
     props: GuiPlotlyUpdateProps
-
 
 
 @dataclasses.dataclass
