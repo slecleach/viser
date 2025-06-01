@@ -47,8 +47,10 @@ const PlotWithAspect = React.memo(function PlotWithAspect({
 
   // Box size change -> width value change -> plot rerender trigger.
   const { ref, width } = useElementSize();
-  plotJson.layout.width = width;
-  plotJson.layout.height = width * aspectRatio;
+  const plotWidth = width || 1; // Fallback to 150 if width is 0
+  plotJson.layout.width = plotWidth;
+  plotJson.layout.height = plotWidth * aspectRatio;
+  console.warn("plotWidth", plotWidth);
   console.warn("plotJson.layout.width", plotJson.layout.width);
   console.warn("plotJson.layout.height", plotJson.layout.height);
   console.warn("aspectRatio", aspectRatio);
@@ -82,7 +84,7 @@ const PlotWithAspect = React.memo(function PlotWithAspect({
       plotJson.layout,
       plotJson.config,
     );
-  }, [plotJson, uuid]); // Re-render when plot data changes
+  }, [plotJson, uuid, plotWidth]); // Re-render when plot data or width changes
 
   return (
     <Paper
