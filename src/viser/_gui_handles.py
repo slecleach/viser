@@ -40,7 +40,6 @@ from ._messages import (
     GuiMultiSliderProps,
     GuiNumberProps,
     GuiPlotlyProps,
-    GuiPlotlyUpdateProps,
     GuiProgressBarProps,
     GuiRemoveMessage,
     GuiRgbaProps,
@@ -782,64 +781,6 @@ class GuiPlotlyHandle(_GuiHandle[None], GuiPlotlyProps):
         assert isinstance(json_str, str)
         # print(json_str)
         self._plotly_json_str = json_str
-
-
-class GuiPlotlyUpdateHandle(_GuiHandle[None], GuiPlotlyUpdateProps):
-    """Handle for updating and removing Plotly figures."""
-
-    def __init__(
-        self,
-        _impl: _GuiHandleState,
-        _plotly_element_uuid: str,
-        _x_data: float,
-        _y_data: float,
-        _history_length: int,
-    ):
-        super().__init__(_impl=_impl)
-        self._plotly_element_uuid = _plotly_element_uuid
-        self._x_data = _x_data
-        self._y_data = _y_data
-        self._history_length = _history_length
-
-    @property
-    def plotly_element_uuid(self) -> str:
-        """Current content of this markdown element. Synchronized automatically when assigned."""
-        assert self._plotly_element_uuid is not None
-        return self._plotly_element_uuid
-
-    @plotly_element_uuid.setter
-    def plotly_element_uuid(self, plotly_element_uuid: str) -> None:
-        self._plotly_element_uuid = plotly_element_uuid
-
-    @property
-    def x_data(self) -> float:
-        """Current content of this markdown element. Synchronized automatically when assigned."""
-        assert self._x_data is not None
-        return self._x_data
-
-    @x_data.setter
-    def x_data(self, x_data: float) -> None:
-        self._x_data = x_data
-
-    @property
-    def y_data(self) -> float:
-        """Current content of this markdown element. Synchronized automatically when assigned."""
-        assert self._y_data is not None
-        return self._y_data
-
-    @y_data.setter
-    def y_data(self, y_data: float) -> None:
-        self._y_data = y_data
-
-    @property
-    def history_length(self) -> int:
-        """Current content of this markdown element. Synchronized automatically when assigned."""
-        assert self._history_length is not None
-        return self._history_length
-
-    @history_length.setter
-    def history_length(self, history_length: int) -> None:
-        self._history_length = history_length
 
 
 class GuiImageHandle(_GuiHandle[None], GuiImageProps):

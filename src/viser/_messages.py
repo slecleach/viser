@@ -1012,7 +1012,7 @@ class GuiPlotlyMessage(_CreateGuiComponentMessage):
 
 
 @dataclasses.dataclass
-class GuiPlotlyUpdateProps:
+class GuiPlotlyExtendTracesProps:
     plotly_element_uuid: str
     """UUID of the plotly element to update. Synchronized automatically when assigned."""
     x_data: float
@@ -1024,9 +1024,9 @@ class GuiPlotlyUpdateProps:
 
 
 @dataclasses.dataclass
-class GuiPlotlyUpdateMessage(Message):
+class GuiPlotlyExtendTracesMessage(Message):
     container_uuid: str
-    props: GuiPlotlyUpdateProps
+    props: GuiPlotlyExtendTracesProps
 
 
 @dataclasses.dataclass

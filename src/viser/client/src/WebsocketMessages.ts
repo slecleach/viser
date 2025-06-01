@@ -474,12 +474,12 @@ export interface GuiPlotlyMessage {
     visible: boolean;
   };
 }
-/** GuiPlotlyUpdateMessage(uuid: 'str', container_uuid: 'str', props: 'GuiPlotlyUpdateProps')
+/** GuiPlotlyExtendTracesMessage(uuid: 'str', container_uuid: 'str', props: 'GuiPlotlyExtendTracesProps')
  *
  * (automatically generated)
  */
-export interface GuiPlotlyUpdateMessage {
-  type: "GuiPlotlyUpdateMessage";
+export interface GuiPlotlyExtendTracesMessage {
+  type: "GuiPlotlyExtendTracesMessage";
   // uuid: string;
   container_uuid: string;
   props: {
@@ -1308,7 +1308,7 @@ export type Message =
   | GuiHtmlMessage
   | GuiProgressBarMessage
   | GuiPlotlyMessage
-  | GuiPlotlyUpdateMessage
+  | GuiPlotlyExtendTracesMessage
   | GuiImageMessage
   | GuiTabGroupMessage
   | GuiButtonMessage
@@ -1395,7 +1395,7 @@ export type GuiComponentMessage =
   | GuiHtmlMessage
   | GuiProgressBarMessage
   | GuiPlotlyMessage
-  | GuiPlotlyUpdateMessage
+  | GuiPlotlyExtendTracesMessage
   | GuiImageMessage
   | GuiTabGroupMessage
   | GuiButtonMessage
@@ -1448,7 +1448,7 @@ const typeSetGuiComponentMessage = new Set([
   "GuiHtmlMessage",
   "GuiProgressBarMessage",
   "GuiPlotlyMessage",
-  "GuiPlotlyUpdateMessage",
+  "GuiPlotlyExtendTracesMessage",
   "GuiImageMessage",
   "GuiTabGroupMessage",
   "GuiButtonMessage",

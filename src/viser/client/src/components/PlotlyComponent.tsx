@@ -1,5 +1,5 @@
 import React from "react";
-import { GuiPlotlyMessage, GuiPlotlyUpdateMessage } from "../WebsocketMessages";
+import { GuiPlotlyMessage, GuiPlotlyExtendTracesMessage } from "../WebsocketMessages";
 import { useDisclosure } from "@mantine/hooks";
 import { Modal, Box, Paper, Tooltip } from "@mantine/core";
 import { useElementSize } from "@mantine/hooks";
@@ -47,7 +47,7 @@ const PlotWithAspect = React.memo(function PlotWithAspect({
 
   // Box size change -> width value change -> plot rerender trigger.
   const { ref, width } = useElementSize();
-  const plotWidth = width || 1; // Fallback to 150 if width is 0
+  const plotWidth = width || 1; // Fallback to 1 if width is 0, the main plot's elementSize is 0.
   plotJson.layout.width = plotWidth;
   plotJson.layout.height = plotWidth * aspectRatio;
   console.warn("plotWidth", plotWidth);
@@ -164,9 +164,9 @@ export default function PlotlyComponent({
 }
 
 // Component for handling plot updates
-export function PlotlyUpdateComponent({
+export function PlotlyExtendTracesComponent({
   props: { plotly_element_uuid, x_data, y_data, history_length },
-}: GuiPlotlyUpdateMessage) {
+}: GuiPlotlyExtendTracesMessage) {
   // Use React hooks to update the plotly object when new data arrives
   React.useEffect(() => {
     // Find both the main plot and modal plot elements

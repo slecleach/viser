@@ -9,10 +9,12 @@ import plotly.graph_objects as go
 
 import viser
 
-# handle the modal plot
+# handle the modal plot DONE
+# handle the main plot reanchoring
 # handle multiple trajectories
 # handles number of elements in history DONE
 # handle boundary ylims, xlims
+# rename functions
 
 
 def create_wave_plot(t: float, wave_type: str = "sin") -> go.Figure:

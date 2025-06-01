@@ -811,9 +811,9 @@ class GuiApi:
 
         self.setup_plotly_js()
 
-        message = _messages.GuiPlotlyUpdateMessage(
+        message = _messages.GuiPlotlyExtendTracesMessage(
             container_uuid=self._get_container_uuid(),
-            props=_messages.GuiPlotlyUpdateProps(
+            props=_messages.GuiPlotlyExtendTracesProps(
                 plotly_element_uuid=plotly_element_uuid,
                 x_data=x_data,
                 y_data=y_data,

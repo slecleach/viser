@@ -16,7 +16,7 @@ import RgbComponent from "../components/Rgb";
 import RgbaComponent from "../components/Rgba";
 import ButtonGroupComponent from "../components/ButtonGroup";
 import MarkdownComponent from "../components/Markdown";
-import PlotlyComponent, { PlotlyUpdateComponent } from "../components/PlotlyComponent";
+import PlotlyComponent, { PlotlyExtendTracesComponent } from "../components/PlotlyComponent";
 import TabGroupComponent from "../components/TabGroup";
 import FolderComponent from "../components/Folder";
 import MultiSliderComponent from "../components/MultiSlider";
@@ -112,8 +112,8 @@ function GeneratedInput(props: { guiUuid: string }) {
       return <HtmlComponent {...conf} />;
     case "GuiPlotlyMessage":
       return <PlotlyComponent {...conf} />;
-    case "GuiPlotlyUpdateMessage":
-      return <PlotlyUpdateComponent {...conf} />;
+    case "GuiPlotlyExtendTracesMessage":
+      return <PlotlyExtendTracesComponent {...conf} />;
     case "GuiImageMessage":
       return <ImageComponent {...conf} />;
     case "GuiButtonMessage":
