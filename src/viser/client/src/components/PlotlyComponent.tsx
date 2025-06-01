@@ -166,10 +166,10 @@ export function PlotlyExtendTracesComponent({
         Plotly.extendTraces(
           element,
           {
-            x: [[x_data]],
-            y: [[y_data]]
+            x: x_data,  // Now passing array of arrays directly
+            y: y_data   // Now passing array of arrays directly
           },
-          [0], // Update the first trace
+          Array.from({ length: x_data.length }, (_, i) => i), // Update all traces
           history_length
         );
       } catch (error) {

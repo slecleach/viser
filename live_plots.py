@@ -19,19 +19,19 @@ import viser
 
 def create_wave_plot(t: float, wave_type: str = "sin") -> go.Figure:
     """Create a wave plot starting at time t."""
-    x_data = np.linspace(t, t + 6 * np.pi, 50)
+    x_data = np.linspace(t, t + 0.1 * np.pi, 50)
     if wave_type == "sin":
-        y_data = np.sin(x_data) * 10
+        y_data = np.sin(60 * x_data) * 10
         title = "Sine Wave"
     else:
-        y_data = np.cos(x_data) * 10
+        y_data = np.cos(60 * x_data) * 10
         title = "Cosine Wave"
 
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
             x=list(x_data),
-            y=list(y_data),
+            y=list(10 + y_data),
             mode="lines",
             line=dict(color="red", width=2),  # Thinner line
             fill="tozeroy",
@@ -68,15 +68,16 @@ def main() -> None:
 
     Nfull = 20
     Nupdate = 100000
-    time_step = 0.01
+    time_step = 0.1
+    Nchunk = 2
 
     # Create two plots
     time_value = 0.0
     sin_plot_handle = server.gui.add_plotly(
-        figure=create_wave_plot(time_value, "sin"), aspect=0.5
+        figure=create_wave_plot(time_value, "sin"), aspect=0.75
     )
     cos_plot_handle = server.gui.add_plotly(
-        figure=create_wave_plot(time_value, "cos"), aspect=0.5
+        figure=create_wave_plot(time_value, "cos"), aspect=0.75
     )
 
     # while True:
@@ -90,19 +91,26 @@ def main() -> None:
 
     for i in range(Nupdate):
         t0 = time.time()
+        x_data = time_value + time_step * np.arange(Nchunk) / Nchunk
+        server.gui.plotly_extend_traces(
+            plotly_element_uuid=cos_plot_handle._impl.uuid,
+            x_data=np.tile(x_data, (2, 1)),
+            y_data=np.array([10 + np.arange(Nchunk), np.arange(Nchunk)]),
+            history_length=50,
+        )
         server.gui.plotly_extend_traces(
             plotly_element_uuid=sin_plot_handle._impl.uuid,
-            x_data=time_value,
-            y_data=-12.0 + np.sin(time_value),
-            history_length=20 + i % 20,
+            x_data=np.tile(x_data, (2, 1)),
+            y_data=np.array([10 + np.arange(Nchunk), np.arange(Nchunk)]),
+            history_length=50,
         )
-        print("history_length", 150 + i % 150)
+        print("cos_plot_handle", cos_plot_handle._impl.uuid)
+        print("sin_plot_handle", sin_plot_handle._impl.uuid)
         t1 = time.time()
         elapsed = t1 - t0
         print("elapsed", elapsed)
         time.sleep(time_step)
         time_value += time_step
-        # print("time_value", time_value)
 
     input("Press Enter to continue...")
 

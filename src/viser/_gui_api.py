@@ -17,6 +17,7 @@ from typing import (
     Sequence,
     Tuple,
     TypeVar,
+    Union,
     cast,
     overload,
 )
@@ -796,30 +797,31 @@ class GuiApi:
     def plotly_extend_traces(
         self,
         plotly_element_uuid: str,
-        x_data: float,
-        y_data: float,
+        x_data: list[float] | list[list[float]] | np.ndarray,
+        y_data: list[float] | list[list[float]] | np.ndarray,
         history_length: int,
     ) -> None:
-        """Update a Plotly figure in the GUI.
+        """Extend traces in a plotly plot with new data.
 
         Args:
-            plotly_element_uuid: uuid of the plotly element to update.
-            x_data: New x-data for the plot.
-            y_data: New y-data for the plot.
-            history_length: Number of points to keep in the plot history.
+            plotly_element_uuid: UUID of the plotly element to update
+            x_data: X-axis data. Can be a 1D list/array for single trace or 2D list/array for multiple traces
+            y_data: Y-axis data. Can be a 1D list/array for single trace or 2D list/array for multiple traces
+            history_length: Number of points to keep in the history
         """
-
-        self.setup_plotly_js()
-
+        # Create a unique message for each update
         message = _messages.GuiPlotlyExtendTracesMessage(
             container_uuid=self._get_container_uuid(),
             props=_messages.GuiPlotlyExtendTracesProps(
                 plotly_element_uuid=plotly_element_uuid,
-                x_data=x_data,
-                y_data=y_data,
+                x_data=self.to_list_of_lists(x_data),
+                y_data=self.to_list_of_lists(y_data),
                 history_length=history_length,
             ),
         )
+        # Ensure the message is queued with a unique key
+        # message.redundancy_key = lambda: f"plotly-extend-{plotly_element_uuid}-{id(message)}"
+        print("redundancy_key", message.redundancy_key())
         self._websock_interface.queue_message(message)
 
     def add_button(
@@ -1684,3 +1686,23 @@ class GuiApi:
             handle_state.sync_cb = sync_other_clients
 
         return handle_state
+
+    def to_list_of_lists(self, x: Union[Sequence, np.ndarray]) -> list[list[float]]:
+        """Convert input to a list of list of floats."""
+        if isinstance(x, np.ndarray):
+            arr = x.astype(float)
+            if arr.ndim == 1:
+                return [arr.tolist()]  # Wrap 1D array
+            elif arr.ndim == 2:
+                return arr.tolist()
+            else:
+                raise ValueError(f"Unsupported ndarray with ndim={arr.ndim}")
+        elif isinstance(x, (list, tuple)):
+            if all(isinstance(el, (int, float)) for el in x):
+                return [[float(val) for val in x]]  # 1D list
+            elif all(isinstance(el, (list, tuple)) for el in x):
+                return [[float(val) for val in row] for row in x]  # 2D list
+            else:
+                raise ValueError("List must contain only numbers or lists of numbers.")
+        else:
+            raise TypeError(f"Unsupported input type: {type(x)}")

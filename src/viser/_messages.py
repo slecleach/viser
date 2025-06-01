@@ -1015,10 +1015,10 @@ class GuiPlotlyMessage(_CreateGuiComponentMessage):
 class GuiPlotlyExtendTracesProps:
     plotly_element_uuid: str
     """UUID of the plotly element to update. Synchronized automatically when assigned."""
-    x_data: float
-    """X-data for the plot. Synchronized automatically when assigned."""
-    y_data: float
-    """Y-data for the plot. Synchronized automatically when assigned."""
+    x_data: list[float]
+    """List of x-data points for each trace. Synchronized automatically when assigned."""
+    y_data: list[float]
+    """List of y-data points for each trace. Synchronized automatically when assigned."""
     history_length: int
     """History length for the plot. Synchronized automatically when assigned."""
 
@@ -1027,6 +1027,10 @@ class GuiPlotlyExtendTracesProps:
 class GuiPlotlyExtendTracesMessage(Message):
     container_uuid: str
     props: GuiPlotlyExtendTracesProps
+
+    @override
+    def redundancy_key(self) -> str:
+        return f"plotly-extend-{self.props.plotly_element_uuid}"
 
 
 @dataclasses.dataclass
