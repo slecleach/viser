@@ -16,7 +16,7 @@ from viser._gui_api import _apply_default_order
 
 # handle the modal plot
 # handle multiple trajectories
-# handles number of elements in history
+# handles number of elements in history DONE
 # handle boundary ylims, xlims
 
 
@@ -71,7 +71,7 @@ def main() -> None:
 
     Nfull = 20
     Nupdate = 300000
-    time_step = 0.0001
+    time_step = 0.01
 
     # Create two plots
     time_value = 0.0
@@ -91,13 +91,13 @@ def main() -> None:
 
     for i in range(Nupdate):
         t0 = time.time()
-        server.gui.extend_traces_plotly(
-            new_x_data = time_value,
-            new_y_data = -12.0 + np.sin(time_value),
-            history_length=20 + i % 20,
+        server.gui.plotly_extend_traces(
             plotly_element_uuid=sin_plot_handle._impl.uuid,
+            x_data = time_value,
+            y_data = -12.0 + np.sin(time_value),
+            history_length=20 + i % 20,
         )
-        print("history_length", 20 + i % 20)
+        print("history_length", 150 + i % 150)
         t1 = time.time()
         elapsed = t1 - t0
         print("elapsed", elapsed)

@@ -483,10 +483,10 @@ export interface GuiPlotlyUpdateMessage {
   // uuid: string;
   container_uuid: string;
   props: {
+    plotly_element_uuid: string;
     x_data: number;
     y_data: number;
     history_length: number;
-    plotly_element_uuid: string;
   };
 }
 

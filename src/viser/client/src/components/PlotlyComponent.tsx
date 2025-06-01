@@ -29,24 +29,18 @@ function printAllUUIDs() {
 
 
 const PlotWithAspect = React.memo(function PlotWithAspect({
-  jsonStr,
+  plotJson,
   aspectRatio,
   staticPlot,
-  uuid, // Add this prop to receive the UUID
-  isModal = false, // Add this prop to identify if this is the modal plot
+  uuid,
 }: {
-  jsonStr: string;
+  plotJson: any;
   aspectRatio: number;
   staticPlot: boolean;
   uuid: string;
-  isModal?: boolean;
 }) {
-  // Catch if the jsonStr is empty; if so, render an empty div.
-  if (jsonStr === "") return <div></div>;
-
-  // Parse json string, to construct plotly object.
-  // Note that only the JSON string is kept as state, not the json object.
-  const plotJson = JSON.parse(jsonStr);
+  // Catch if the plotJson is empty; if so, render an empty div.
+  if (!plotJson) return <div></div>;
 
   // This keeps the zoom-in state, etc, see https://plotly.com/javascript/uirevision/.
   plotJson.layout.uirevision = "true";
@@ -71,12 +65,11 @@ const PlotWithAspect = React.memo(function PlotWithAspect({
   // Use React hooks to update the plotly object, when the plot data changes.
   // based on https://github.com/plotly/react-plotly.js/issues/242.
   const plotRef = React.useRef<HTMLDivElement>(null);
+
   React.useEffect(() => {
-    // Set the ID of the plot element to match the UUID, with a suffix for modal
+    // Set the ID of the plot element
     if (plotRef.current) {
-      const elementId = isModal ? `${uuid}-modal` : uuid;
-      plotRef.current.id = elementId;
-      console.log("Setting plot element ID to:", elementId);
+      plotRef.current.id = uuid;
     }
     
     // @ts-ignore - Plotly.js is dynamically imported with an eval() call.
@@ -86,7 +79,7 @@ const PlotWithAspect = React.memo(function PlotWithAspect({
       plotJson.layout,
       plotJson.config,
     );
-  }, [plotJson, uuid, isModal]); // Add isModal to dependencies
+  }, [plotJson, uuid]); // Re-render when plot data changes
 
   return (
     <Paper
@@ -95,7 +88,7 @@ const PlotWithAspect = React.memo(function PlotWithAspect({
       withBorder
       style={{ position: "relative" }}
     >
-      <div ref={plotRef} id={isModal ? `${uuid}-modal` : uuid} />
+      <div ref={plotRef} id={uuid} />
       {/* Add a div on top of the plot, to prevent interaction + cursor changes. */}
       {staticPlot ? (
         <div
@@ -115,28 +108,17 @@ const PlotWithAspect = React.memo(function PlotWithAspect({
 
 export default function PlotlyComponent({
   props: { visible, _plotly_json_str: plotly_json_str, aspect },
-  uuid, // Add this to get the component's UUID
+  uuid,
 }: GuiPlotlyMessage) {
-  // Add logging before the visibility check
-  // console.log("%c[PlotlyComponent] Rendering", "color: #FF5722; font-weight: bold; font-size: 14px", {
-  //   visible,
-  //   hasPlotlyData: !!plotly_json_str,
-  //   aspect
-  // });
-
   if (!visible) return null;
 
-  console.log("%c[PlotlyComponent] Received update", "color: #4CAF50; font-weight: bold", {
-    plotly_json_str: plotly_json_str?.substring(0, 100) + "...", // Show first 100 chars
-    aspect,
-    timestamp: new Date().toISOString(),
-    visible
-  });
+  // Parse the JSON string once and maintain it as an object
+  const [plotJson, setPlotJson] = React.useState(() => JSON.parse(plotly_json_str));
 
-  // // Print all UUIDs before trying to find the plot element
-  // const allUuids = printAllUUIDs();
-  // console.warn("PlotlyComponent: Available UUIDs:", allUuids);
-
+  // Update plot data when new JSON string comes in
+  React.useEffect(() => {
+    setPlotJson(JSON.parse(plotly_json_str));
+  }, [plotly_json_str]);
 
   // Create a modal with the plot, and a button to open it.
   const [opened, { open, close }] = useDisclosure(false);
@@ -152,21 +134,20 @@ export default function PlotlyComponent({
           onClick={open}
         >
           <PlotWithAspect
-            jsonStr={plotly_json_str}
+            plotJson={plotJson}
             aspectRatio={aspect}
             staticPlot={true}
-            uuid={uuid} // Pass the UUID to PlotWithAspect
+            uuid={uuid}
           />
         </Box>
       </Tooltip.Floating>
 
       <Modal opened={opened} onClose={close} size="xl" keepMounted>
         <PlotWithAspect
-          jsonStr={plotly_json_str}
+          plotJson={plotJson}
           aspectRatio={aspect}
           staticPlot={false}
-          uuid={uuid}
-          isModal={true} // Add this prop to identify the modal plot
+          uuid={`${uuid}-modal`}
         />
       </Modal>
     </Box>
@@ -175,18 +156,10 @@ export default function PlotlyComponent({
 
 // Component for handling plot updates
 export function PlotlyUpdateComponent({
-  props: { x_data, y_data, history_length, plotly_element_uuid },
+  props: { plotly_element_uuid, x_data, y_data, history_length },
 }: GuiPlotlyUpdateMessage) {
   // Use React hooks to update the plotly object when new data arrives
   React.useEffect(() => {
-    console.log("[PlotlyUpdateComponent] Received update:", {
-      x_data,
-      y_data,
-      history_length,
-      plotly_element_uuid,
-      timestamp: new Date().toISOString()
-    });
-
     // Find both the main plot and modal plot elements
     const mainPlotElement = document.getElementById(plotly_element_uuid);
     const modalPlotElement = document.getElementById(`${plotly_element_uuid}-modal`);
@@ -208,7 +181,7 @@ export function PlotlyUpdateComponent({
             y: [[y_data]]
           },
           [0], // Update the first trace
-          150
+          history_length
         );
       } catch (error) {
         console.error("Error updating plot:", error);
@@ -217,7 +190,7 @@ export function PlotlyUpdateComponent({
 
     updatePlot(mainPlotElement);
     updatePlot(modalPlotElement);
-  }, [x_data, y_data, plotly_element_uuid]);
+  }, [plotly_element_uuid, x_data, y_data, history_length]);
 
   // This component doesn't render anything visible
   return null;

@@ -795,20 +795,20 @@ class GuiApi:
         return handle
 
 
-    def extend_traces_plotly(
+    def plotly_extend_traces(
         self,
-        new_x_data: float,
-        new_y_data: float,
-        history_length: int,
         plotly_element_uuid: str,
+        x_data: float,
+        y_data: float,
+        history_length: int,
     ) -> None:
         """Update a Plotly figure in the GUI.
 
         Args:
-            # handle: Handle to the Plotly figure to update.
             plotly_element_uuid: uuid of the plotly element to update.
-            new_x_data: New x-data for the plot.
-            new_y_data: New y-data for the plot.
+            x_data: New x-data for the plot.
+            y_data: New y-data for the plot.
+            history_length: Number of points to keep in the plot history.
         """
 
         self.setup_plotly_js()
@@ -816,10 +816,10 @@ class GuiApi:
         message = _messages.GuiPlotlyUpdateMessage(
             container_uuid=self._get_container_uuid(),
             props=_messages.GuiPlotlyUpdateProps(
-                x_data=new_x_data,
-                y_data=new_y_data,
-                history_length=history_length,
                 plotly_element_uuid=plotly_element_uuid,
+                x_data=x_data,
+                y_data=y_data,
+                history_length=history_length,
             ),
         )
         self._websock_interface.queue_message(message)

@@ -786,11 +786,12 @@ class GuiPlotlyHandle(_GuiHandle[None], GuiPlotlyProps):
 class GuiPlotlyUpdateHandle(_GuiHandle[None], GuiPlotlyUpdateProps):
     """Handle for updating and removing Plotly figures."""
 
-    def __init__(self, _impl: _GuiHandleState, _plotly_element_uuid: str, _x_data: float, _y_data: float):
+    def __init__(self, _impl: _GuiHandleState, _plotly_element_uuid: str, _x_data: float, _y_data: float, _history_length: int):
         super().__init__(_impl=_impl)
         self._plotly_element_uuid = _plotly_element_uuid
         self._x_data = _x_data
         self._y_data = _y_data
+        self._history_length = _history_length
 
     @property
     def plotly_element_uuid(self) -> str:
@@ -821,6 +822,17 @@ class GuiPlotlyUpdateHandle(_GuiHandle[None], GuiPlotlyUpdateProps):
     @y_data.setter
     def y_data(self, y_data: float) -> None:
         self._y_data = y_data
+
+    @property
+    def history_length(self) -> int:
+        """Current content of this markdown element. Synchronized automatically when assigned."""
+        assert self._history_length is not None
+        return self._history_length 
+    
+    @history_length.setter
+    def history_length(self, history_length: int) -> None:
+        self._history_length = history_length
+    
 
 class GuiImageHandle(_GuiHandle[None], GuiImageProps):
     """Handle for updating and removing images."""
