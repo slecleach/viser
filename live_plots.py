@@ -64,7 +64,7 @@ def main() -> None:
     server = viser.ViserServer()
 
     Nfull = 20
-    Nupdate = 300000
+    Nupdate = 0
     time_step = 0.01
 
     # Create two plots
