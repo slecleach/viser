@@ -64,13 +64,17 @@ def main() -> None:
     server = viser.ViserServer()
 
     Nfull = 20
-    Nupdate = 0
+    Nupdate = 100000
     time_step = 0.01
 
     # Create two plots
     time_value = 0.0
-    sin_plot_handle = server.gui.add_plotly(figure=create_wave_plot(time_value, "sin"))
-    cos_plot_handle = server.gui.add_plotly(figure=create_wave_plot(time_value, "cos"))
+    sin_plot_handle = server.gui.add_plotly(
+        figure=create_wave_plot(time_value, "sin"), aspect=0.5
+    )
+    cos_plot_handle = server.gui.add_plotly(
+        figure=create_wave_plot(time_value, "cos"), aspect=0.5
+    )
 
     # while True:
     for i in range(Nfull):

@@ -49,6 +49,9 @@ const PlotWithAspect = React.memo(function PlotWithAspect({
   const { ref, width } = useElementSize();
   plotJson.layout.width = width;
   plotJson.layout.height = width * aspectRatio;
+  console.warn("plotJson.layout.width", plotJson.layout.width);
+  console.warn("plotJson.layout.height", plotJson.layout.height);
+  console.warn("aspectRatio", aspectRatio);
 
   // Make the plot non-interactable, if specified.
   // Ideally, we would use `staticplot`, but this has a known bug with 3D plots:
