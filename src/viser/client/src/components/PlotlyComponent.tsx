@@ -8,26 +8,6 @@ import { useElementSize } from "@mantine/hooks";
 import { folderWrapper } from "./Folder.css";
 
 
-// Add this function to PlotlyComponent.tsx
-function printAllUUIDs() {
-  // Get all elements in the document
-  const allElements = document.getElementsByTagName('*');
-  const uuids: string[] = [];
-
-  // Loop through all elements and collect their IDs
-  for (let i = 0; i < allElements.length; i++) {
-    const element = allElements[i];
-    if (element.id) {
-      uuids.push(element.id);
-    }
-  }
-
-  console.log("All UUIDs in the scene:", uuids);
-  return uuids;
-}
-
-
-
 const PlotWithAspect = React.memo(function PlotWithAspect({
   plotJson,
   aspectRatio,

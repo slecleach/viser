@@ -57,6 +57,7 @@ def create_wave_plot(t: float, wave_type: str = "sin") -> go.Figure:
         yaxis_title=f"{wave_type}(x)",
         margin=dict(l=20, r=20, t=40, b=20),
         showlegend=False,
+        yaxis=dict(range=[-15, 15]),
     )
 
     return fig
