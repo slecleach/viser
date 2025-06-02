@@ -483,7 +483,7 @@ export interface GuiPlotlyExtendTracesMessage {
   // uuid: string;
   container_uuid: string;
   props: {
-    plotly_element_uuid: string;
+    plotly_element_uuids: string[];
     x_data: number[][];
     y_data: number[][];
     history_length: number;

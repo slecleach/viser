@@ -30,10 +30,10 @@ const PlotWithAspect = React.memo(function PlotWithAspect({
   const plotWidth = width || 1; // Fallback to 1 if width is 0, the main plot's elementSize is 0.
   plotJson.layout.width = plotWidth;
   plotJson.layout.height = plotWidth * aspectRatio;
-  console.warn("plotWidth", plotWidth);
-  console.warn("plotJson.layout.width", plotJson.layout.width);
-  console.warn("plotJson.layout.height", plotJson.layout.height);
-  console.warn("aspectRatio", aspectRatio);
+  // console.warn("plotWidth", plotWidth);
+  // console.warn("plotJson.layout.width", plotJson.layout.width);
+  // console.warn("plotJson.layout.height", plotJson.layout.height);
+  // console.warn("aspectRatio", aspectRatio);
 
   // Make the plot non-interactable, if specified.
   // Ideally, we would use `staticplot`, but this has a known bug with 3D plots:
@@ -95,6 +95,7 @@ export default function PlotlyComponent({
   props: { visible, _plotly_json_str: plotly_json_str, aspect },
   uuid,
 }: GuiPlotlyMessage) {
+  const t0 = performance.now();
   if (!visible) return null;
 
   // Parse the JSON string once and maintain it as an object
@@ -111,7 +112,7 @@ export default function PlotlyComponent({
 
   // Create a modal with the plot, and a button to open it.
   const [opened, { open, close }] = useDisclosure(false);
-  return (
+  const ddd =   (
     <Box>
       <Tooltip.Floating zIndex={100} label={"Click to expand"}>
         <Box
@@ -127,7 +128,7 @@ export default function PlotlyComponent({
             aspectRatio={aspect}
             staticPlot={true}
             uuid={uuid}
-          />
+            />
         </Box>
       </Tooltip.Floating>
 
@@ -137,49 +138,71 @@ export default function PlotlyComponent({
           aspectRatio={aspect}
           staticPlot={false}
           uuid={`${uuid}-modal`}
-        />
+          />
       </Modal>
     </Box>
   );
+  const t1 = performance.now();
+  console.warn("PlotlyComponent time:", t1 - t0);
+  return ddd;
 }
 
 // Component for handling plot updates
 export function PlotlyExtendTracesComponent({
-  props: { plotly_element_uuid, x_data, y_data, history_length },
+  props: { plotly_element_uuids, x_data, y_data, history_length },
 }: GuiPlotlyExtendTracesMessage) {
   // Use React hooks to update the plotly object when new data arrives
   React.useEffect(() => {
-    // Find both the main plot and modal plot elements
-    const mainPlotElement = document.getElementById(plotly_element_uuid);
-    const modalPlotElement = document.getElementById(`${plotly_element_uuid}-modal`);
+    const t0 = performance.now();
 
-    if (!mainPlotElement && !modalPlotElement) {
-      console.warn("Could not find any plot elements with UUID:", plotly_element_uuid);
+    // Batch all plot elements first
+    const t1 = performance.now();
+    const plotElements = plotly_element_uuids.flatMap(uuid => {
+      const main = document.getElementById(uuid);
+      const modal = document.getElementById(`${uuid}-modal`);
+      return [main, modal].filter(Boolean);
+    });
+    const t2 = performance.now();
+    console.warn("DOM query time:", t2 - t1);
+
+    if (plotElements.length === 0) {
+      console.warn("Could not find any plot elements with UUIDs:", plotly_element_uuids);
       return;
     }
 
-    // Update both plots with new data
-    const updatePlot = (element: HTMLElement | null) => {
-      if (!element) return;
-      try {
-        // @ts-ignore - Plotly.js is dynamically imported
+    try {
+      // @ts-ignore - Plotly.js is dynamically imported
+      const Plotly = (window as any).Plotly;
+      const t3 = performance.now();
+
+      // Pre-compute trace indices once
+      const traceIndices = Array.from({ length: x_data.length }, (_, i) => i);
+
+      // Update each plot with minimal data processing
+      plotElements.forEach((element, index) => {
+        const t4 = performance.now();
+        // Use a more direct update approach
         Plotly.extendTraces(
           element,
-          {
-            x: x_data,  // Now passing array of arrays directly
-            y: y_data   // Now passing array of arrays directly
-          },
-          Array.from({ length: x_data.length }, (_, i) => i), // Update all traces
-          history_length
+          { x: x_data, y: y_data },
+          traceIndices,
+          history_length,
+          { mode: 'lines' }  // Optimize for line plots
         );
-      } catch (error) {
-        console.error("Error updating plot:", error);
-      }
-    };
+        const t5 = performance.now();
+        console.warn(`Plot ${index} update time:`, t5 - t4);
+      });
 
-    updatePlot(mainPlotElement);
-    updatePlot(modalPlotElement);
-  }, [plotly_element_uuid, x_data, y_data, history_length]);
+      const t6 = performance.now();
+      console.warn("Total Plotly updates time:", t6 - t3);
+    } catch (error) {
+      console.error("Error updating plots:", error);
+    }
+
+    const t7 = performance.now();
+    console.warn("Total execution time:", t7 - t0);
+
+  }, [plotly_element_uuids, x_data, y_data, history_length]);
 
   // This component doesn't render anything visible
   return null;

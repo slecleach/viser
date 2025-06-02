@@ -155,3 +155,68 @@ class AsyncMessageBuffer:
                 if flush_wait in done and not self.done:
                     self.flush_event.clear()
                     flush_wait = self.event_loop.create_task(self.flush_event.wait())
+
+    # async def window_generator(
+    #     self, client_id: int
+    # ) -> AsyncGenerator[Sequence[Message], None]:
+    #     """Async iterator over messages. Loops infinitely, and waits when no messages
+    #     are available."""
+
+    #     last_sent_id = -1  # ID of the last message we've sent
+    #     flush_wait = self.event_loop.create_task(self.flush_event.wait())
+
+    #     while not self.done:
+    #         window: List[Message] = []
+
+    #         with self.buffer_lock:
+    #             # Get all message IDs > last_sent_id, sorted in order
+    #             next_ids = sorted(
+    #                 msg_id for msg_id in self.message_from_id.keys()
+    #                 if msg_id > last_sent_id
+    #             )
+
+    #         for msg_id in next_ids:
+    #             # Don't send anything while atomic block is active
+    #             if self.atomic_counter > 0:
+    #                 break
+
+    #             with self.buffer_lock:
+    #                 message = (
+    #                     self.message_from_id.get(msg_id)
+    #                     if self.persistent_messages
+    #                     else self.message_from_id.pop(msg_id, None)
+    #                 )
+
+    #                 if message is not None and not self.persistent_messages:
+    #                     # Clean up redundancy tracking if needed
+    #                     redundancy_key = message.redundancy_key()
+    #                     self.id_from_redundancy_key.pop(redundancy_key, None)
+
+    #             if message is not None and message.excluded_self_client != client_id:
+    #                 window.append(message)
+    #                 last_sent_id = msg_id
+
+    #             if len(window) >= self.max_window_size:
+    #                 break
+
+    #         if len(window) > 0:
+    #             yield window
+    #         else:
+    #             # Wait for either new message or flush trigger
+    #             await self.message_event.wait()
+    #             self.message_event.clear()
+
+    #         # Optional delay logic (rate limiting)
+    #         with self.buffer_lock:
+    #             pending_ids = [
+    #                 msg_id for msg_id in self.message_from_id.keys()
+    #                 if msg_id > last_sent_id
+    #             ]
+    #         if not pending_ids:
+    #             done, pending = await asyncio.wait(
+    #                 [flush_wait], timeout=self.window_duration_sec
+    #             )
+    #             del pending
+    #             if flush_wait in done and not self.done:
+    #                 self.flush_event.clear()
+    #                 flush_wait = self.event_loop.create_task(self.flush_event.wait())

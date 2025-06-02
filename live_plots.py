@@ -45,8 +45,8 @@ def create_wave_plot(t: float, wave_type: str = "sin") -> go.Figure:
             y=list(y_data),
             mode="lines",
             line=dict(color="blue", width=2),  # Thinner line
-            fill="tozeroy",
-            fillcolor="rgba(0, 0, 255, 0.2)",
+            # fill="tozeroy",
+            # fillcolor="rgba(0, 0, 255, 0.2)",
             name=wave_type + "_2",
         )
     )
@@ -57,7 +57,9 @@ def create_wave_plot(t: float, wave_type: str = "sin") -> go.Figure:
         yaxis_title=f"{wave_type}(x)",
         margin=dict(l=20, r=20, t=40, b=20),
         showlegend=False,
-        yaxis=dict(range=[-15, 15]),
+        # yaxis=dict(range=[-15, 15]),
+        xaxis=dict(autorange=False),
+        yaxis=dict(autorange=False),
     )
 
     return fig
@@ -66,10 +68,10 @@ def create_wave_plot(t: float, wave_type: str = "sin") -> go.Figure:
 def main() -> None:
     server = viser.ViserServer()
 
-    Nfull = 20
+    Nfull = 40
     Nupdate = 100000
     time_step = 0.1
-    Nchunk = 2
+    Nchunk = 1
 
     # Create two plots
     time_value = 0.0
@@ -91,19 +93,23 @@ def main() -> None:
 
     for i in range(Nupdate):
         t0 = time.time()
+
         x_data = time_value + time_step * np.arange(Nchunk) / Nchunk
-        server.gui.plotly_extend_traces(
-            plotly_element_uuid=cos_plot_handle._impl.uuid,
-            x_data=np.tile(x_data, (2, 1)),
-            y_data=np.array([10 + np.arange(Nchunk), np.arange(Nchunk)]),
-            history_length=50,
+        x_data = np.tile(x_data, (2, 1))
+        y_data = 10 * np.sin(5 * x_data) + np.array(
+            [5 * np.ones(Nchunk), np.zeros(Nchunk)]
         )
+
         server.gui.plotly_extend_traces(
-            plotly_element_uuid=sin_plot_handle._impl.uuid,
-            x_data=np.tile(x_data, (2, 1)),
-            y_data=np.array([10 + np.arange(Nchunk), np.arange(Nchunk)]),
-            history_length=50,
+            plotly_element_uuids=[
+                cos_plot_handle._impl.uuid,
+                sin_plot_handle._impl.uuid,
+            ],
+            x_data=x_data,
+            y_data=y_data,
+            history_length=10,
         )
+
         print("cos_plot_handle", cos_plot_handle._impl.uuid)
         print("sin_plot_handle", sin_plot_handle._impl.uuid)
         t1 = time.time()

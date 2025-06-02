@@ -796,7 +796,7 @@ class GuiApi:
 
     def plotly_extend_traces(
         self,
-        plotly_element_uuid: str,
+        plotly_element_uuids: list[str],
         x_data: list[float] | list[list[float]] | np.ndarray,
         y_data: list[float] | list[list[float]] | np.ndarray,
         history_length: int,
@@ -804,16 +804,17 @@ class GuiApi:
         """Extend traces in a plotly plot with new data.
 
         Args:
-            plotly_element_uuid: UUID of the plotly element to update
+            plotly_element_uuids: UUIDs of the plotly elements to update
             x_data: X-axis data. Can be a 1D list/array for single trace or 2D list/array for multiple traces
             y_data: Y-axis data. Can be a 1D list/array for single trace or 2D list/array for multiple traces
             history_length: Number of points to keep in the history
         """
         # Create a unique message for each update
         message = _messages.GuiPlotlyExtendTracesMessage(
+            # uuid=_make_uuid(),
             container_uuid=self._get_container_uuid(),
             props=_messages.GuiPlotlyExtendTracesProps(
-                plotly_element_uuid=plotly_element_uuid,
+                plotly_element_uuids=plotly_element_uuids,
                 x_data=self.to_list_of_lists(x_data),
                 y_data=self.to_list_of_lists(y_data),
                 history_length=history_length,
@@ -823,6 +824,7 @@ class GuiApi:
         # message.redundancy_key = lambda: f"plotly-extend-{plotly_element_uuid}-{id(message)}"
         print("redundancy_key", message.redundancy_key())
         self._websock_interface.queue_message(message)
+        # self._websock_interface.flush()
 
     def add_button(
         self,
