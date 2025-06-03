@@ -55,6 +55,7 @@ from ._gui_handles import (
     GuiTabGroupHandle,
     GuiTextHandle,
     GuiUploadButtonHandle,
+    GuiUplotHandle,
     GuiVector2Handle,
     GuiVector3Handle,
     SupportsRemoveProtocol,
@@ -213,6 +214,8 @@ class GuiApi:
 
         # Set to True when plotly.min.js has been sent to client.
         self._setup_plotly_js: bool = False
+        self._setup_uplot_css: bool = False
+        self._setup_uplot_js: bool = False
 
         self._websock_interface.register_handler(
             _messages.GuiUpdateMessage, self._handle_gui_updates
@@ -432,9 +435,9 @@ class GuiApi:
         if brand_color is not None:
             assert len(brand_color) in (3, 10)
             if len(brand_color) == 3:
-                assert all(map(lambda val: isinstance(val, int), brand_color)), (
-                    "All channels should be integers."
-                )
+                assert all(
+                    map(lambda val: isinstance(val, int), brand_color)
+                ), "All channels should be integers."
 
                 # RGB => HLS.
                 h, l, s = colorsys.rgb_to_hls(
@@ -744,9 +747,9 @@ class GuiApi:
             plotly_path = (
                 Path(plotly.__file__).parent / "package_data" / "plotly.min.js"
             )
-            assert plotly_path.exists(), (
-                f"Could not find plotly.min.js at {plotly_path}."
-            )
+            assert (
+                plotly_path.exists()
+            ), f"Could not find plotly.min.js at {plotly_path}."
 
             # Send it over!
             plotly_js = plotly_path.read_text(encoding="utf-8")
@@ -785,6 +788,63 @@ class GuiApi:
         # Set the plotly handle properties.
         handle.figure = figure
         handle.aspect = aspect
+        return handle
+
+    def add_uplot(
+        self,
+        x_data: np.ndarray,
+        y_data: np.ndarray,
+    ) -> GuiUplotHandle:
+        """Add a uPlot to the GUI. Requires the `uplot` package to be
+        installed.
+
+        Args:
+            x_data: x-data to display.
+            y_data: y-data to display.
+
+        Returns:
+            A handle that can be used to interact with the GUI element.
+        """
+
+        # <link rel="stylesheet" href="https://unpkg.com/uplot@1.6.24/dist/uPlot.min.css">
+        # <script src="https://unpkg.com/uplot@1.6.24/dist/uPlot.iife.min.js"></script>
+        if not self._setup_uplot_css:
+            uplot_css = "https://unpkg.com/uplot@1.6.24/dist/uPlot.min.css"
+            self._websock_interface.queue_message(
+                _messages.RunJavascriptMessage(source=uplot_css)
+            )
+            self._setup_uplot_css = True
+
+        if not self._setup_uplot_js:
+            uplot_js = "https://unpkg.com/uplot@1.6.24/dist/uPlot.iife.min.js"
+            self._websock_interface.queue_message(
+                _messages.RunJavascriptMessage(source=uplot_js)
+            )
+            self._setup_uplot_js = True
+
+        # After uplot.min.js has been sent, we can send the uplot figure.
+        message = _messages.GuiUplotMessage(
+            uuid=_make_uuid(),
+            container_uuid=self._get_container_uuid(),
+            props=_messages.GuiUplotProps(
+                x_data=x_data,
+                y_data=y_data,
+            ),
+        )
+        self._websock_interface.queue_message(message)
+
+        handle = GuiUplotHandle(
+            _GuiHandleState(
+                message.uuid,
+                self,
+                value=None,
+                props=message.props,
+                parent_container_id=message.container_uuid,
+            ),
+            _x_data=x_data,
+            _y_data=y_data,
+        )
+
         return handle
 
     def add_button(

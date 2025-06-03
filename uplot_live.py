@@ -16,6 +16,11 @@ import viser
 # rename functions
 
 
+GuiUplotHandle
+GuiUplotMessage
+GuiUplotProps
+
+
 def main() -> None:
     server = viser.ViserServer()
 

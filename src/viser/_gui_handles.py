@@ -48,6 +48,7 @@ from ._messages import (
     GuiTabGroupProps,
     GuiTextProps,
     GuiUpdateMessage,
+    GuiUplotProps,
     GuiVector2Props,
     GuiVector3Props,
 )
@@ -780,6 +781,37 @@ class GuiPlotlyHandle(_GuiHandle[None], GuiPlotlyProps):
         json_str = figure.to_json()
         assert isinstance(json_str, str)
         self._plotly_json_str = json_str
+
+
+class GuiUplotHandle(_GuiHandle[None], GuiUplotProps):
+    """Handle for updating and removing Uplot figures."""
+
+    def __init__(
+        self, _impl: _GuiHandleState, _x_data: list[float], _y_data: list[float]
+    ):
+        super().__init__(_impl=_impl)
+        self._x_data = _x_data
+        self._y_data = _y_data
+
+    @property
+    def x_data(self) -> list[float]:
+        """Current content of this markdown element. Synchronized automatically when assigned."""
+        assert self._x_data is not None
+        return self._x_data
+
+    @x_data.setter
+    def x_data(self, x_data: list[float]) -> None:
+        self._x_data = x_data
+
+    @property
+    def y_data(self) -> list[float]:
+        """Current content of this markdown element. Synchronized automatically when assigned."""
+        assert self._y_data is not None
+        return self._y_data
+
+    @y_data.setter
+    def y_data(self, y_data: list[float]) -> None:
+        self._y_data = y_data
 
 
 class GuiImageHandle(_GuiHandle[None], GuiImageProps):

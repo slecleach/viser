@@ -1012,6 +1012,20 @@ class GuiPlotlyMessage(_CreateGuiComponentMessage):
 
 
 @dataclasses.dataclass
+class GuiUplotProps:
+    x_data: list[float]
+    """List of x-data points for each trace."""
+    y_data: list[float]
+    """List of y-data points for each trace."""
+
+
+@dataclasses.dataclass
+class GuiUplotMessage(_CreateGuiComponentMessage):
+    container_uuid: str
+    props: GuiUplotProps
+
+
+@dataclasses.dataclass
 class GuiImageProps:
     order: float
     """Order value for arranging GUI elements. Synchronized automatically when assigned."""
