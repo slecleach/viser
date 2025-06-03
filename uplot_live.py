@@ -16,16 +16,16 @@ import viser
 # rename functions
 
 
-GuiUplotHandle
-GuiUplotMessage
-GuiUplotProps
+# GuiUplotHandle
+# GuiUplotMessage
+# GuiUplotProps
 
 
 def main() -> None:
     server = viser.ViserServer()
 
-    Nupdate = 100000
-    time_step = 0.1
+    Nupdate = 5
+    time_step = 1.1
     Nchunk = 10
     time_value = 0.0
 
