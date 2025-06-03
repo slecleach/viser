@@ -9,7 +9,6 @@ import "uplot/dist/uPlot.min.css";
 // had to install uplot manually:
 // cd src/viser/client && npm install uplot
 
-
 // When drawing border around the plot, it should be aligned with the folder's.
 import { folderWrapper } from "./Folder.css";
 
@@ -30,44 +29,42 @@ const UplotWithAspect = React.memo(function UplotWithAspect({
     if (!width || !plotRef.current) return;
 
     console.log("[UplotWithAspect] Starting initialization with width:", width);
+    console.log("[UplotWithAspect] Data:", { x_data, y_data });
 
-    // Generate test data
-    const length = 100;
-    const xs = Array.from({length}, (_, i) => i);
-    const ys = Array.from({length}, (_, i) => Math.sin(i / 10) * 5);
-    console.log("[UplotWithAspect] Generated test data:", { xs, ys });
-
-    const opts = {
+    const opts: uPlot.Options = {
       width: width,
       height: width * 0.6, // Maintain aspect ratio
       pxAlign: false,
       scales: {
         y: {
-          range: [-6, 6],
+          range: (u: uPlot, min: number, max: number): [number, number] => [min, max],
         }
       },
       series: [
         {}, // x-axis
         {
-          label: "Test Data",
+          label: "Data",
           stroke: "red",
           fill: "rgba(255,0,0,0.1)",
         },
       ],
     };
 
-    const data = [xs, ys];
-    console.log("[UplotWithAspect] Plot options:", opts);
-    console.log("[UplotWithAspect] Plot data:", data);
+    // Convert data to the format uPlot expects
+    const data: uPlot.AlignedData = [
+      new Float64Array(x_data),
+      new Float64Array(y_data)
+    ];
 
-    // Destroy previous instance if it exists
+    // If we already have a plot instance, just update the data
     if (uplotInstance.current) {
-      uplotInstance.current.destroy();
+      console.log("[UplotWithAspect] Updating existing plot");
+      uplotInstance.current.setData(data);
+    } else {
+      console.log("[UplotWithAspect] Creating new plot");
+      // Create new uPlot instance
+      uplotInstance.current = new uPlot(opts, data, plotRef.current);
     }
-
-    // Create new uPlot instance
-    uplotInstance.current = new uPlot(opts, data, plotRef.current);
-    console.log("[UplotWithAspect] Plot created successfully");
 
     // Cleanup on unmount
     return () => {
@@ -76,7 +73,7 @@ const UplotWithAspect = React.memo(function UplotWithAspect({
         uplotInstance.current = null;
       }
     };
-  }, [width]);
+  }, [width, x_data, y_data]);
 
   console.log("[UplotWithAspect] Return statement");
   return (
