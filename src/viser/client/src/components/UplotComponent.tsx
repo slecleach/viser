@@ -72,12 +72,6 @@ const UplotWithAspect = React.memo(function UplotWithAspect({
       uplotInstance.current = new uPlot(opts, data, plotRef.current);
     }
 
-
-    const Chart = () => (
-        <UplotReact options={options} data={data} target={target} onCreate={(chart) => {}} onDelete={(chart) => {}} />
-    );
-
-
     // Cleanup on unmount
     return () => {
       if (uplotInstance.current) {
@@ -104,42 +98,64 @@ const UplotWithAspect = React.memo(function UplotWithAspect({
 });
 
 export default function UplotComponent({
-  props: { x_data, y_data },
+  props: {x_data, y_data },
 }: GuiUplotMessage) {
   // Create a modal with the plot, and a button to open it.
   const [opened, { open, close }] = useDisclosure(false);
+  const { ref, width } = useElementSize();
+  const modalRef = React.useRef<HTMLDivElement>(null);
+  const { width: modalWidth } = useElementSize({ ref: modalRef });
 
-
-  const data = [
-    [0, 1, 2, 3, 4, 5],
-    [0, 1, 2, 3, 4, 5],
+  // Convert data to the format uPlot expects
+  const data: uPlot.AlignedData = [
+    new Float64Array(x_data),
+    new Float64Array(y_data)
   ];
 
-  const options = {
-      width: 400,
-      height: 300,
-      scales: {
-          x: {
-              time: false,
-              range: [-0.5, 5.5],
-          },
-          y: {},
+  const options: uPlot.Options = {
+    width: width || 400, // Use container width or fallback to 400
+    height: (width || 400) * 0.6, // Maintain aspect ratio
+    scales: {
+      x: {
+        time: false,
+        range: (u: uPlot, min: number, max: number): [number, number] => [-0.5, 5.5],
       },
-      axes: [{}],
-      series: [
-          {},
-          {
-              stroke: 'blue',
-          },
-      ],
+      y: {
+        range: (u: uPlot, min: number, max: number): [number, number] => [min, max],
+      },
+    },
+    axes: [{}],
+    series: [
+      {}, // x-axis
+      {
+        stroke: 'blue',
+      },
+    ],
   };
-  const { ref, width } = useElementSize();
 
-  const Chart = () => <UplotReact options={options} data={data} onCreate={(chart) => {}} onDelete={(chart) => {}} />;
+  const modal_options: uPlot.Options = {
+    width: 0.8 * modalWidth || 700, // Use modal width or fallback to 800
+    height: (0.8 * modalWidth || 700) * 0.6, // Maintain aspect ratio
+    scales: {
+      x: {
+        time: false,
+        range: (u: uPlot, min: number, max: number): [number, number] => [-0.5, 5.5],
+      },
+      y: {
+        range: (u: uPlot, min: number, max: number): [number, number] => [min, max],
+      },
+    },
+    axes: [{}],
+    series: [
+      {}, // x-axis
+      {
+        stroke: 'blue',
+      },
+    ],
+  };
 
   return (
     <Box>
-      {/* Draw static plot in the controlpanel, which can be clicked. */}
       <Tooltip.Floating zIndex={100} label={"Click to expand"}>
         <Box
           style={{
@@ -149,12 +165,7 @@ export default function UplotComponent({
           }}
           onClick={open}
         >
-          {/* <UplotWithAspect
-            x_data={x_data}
-            y_data={y_data}
-          /> */}
-          {
-            <Paper
+          <Paper
             ref={ref}
             className={folderWrapper}
             withBorder
@@ -163,19 +174,25 @@ export default function UplotComponent({
               width: "95%",
             }}
           >
-            <Chart />
+            <UplotReact 
+              options={options} 
+              data={data} 
+              onCreate={(chart) => {}} 
+              onDelete={(chart) => {}} 
+            />
           </Paper>
-          }
         </Box>
       </Tooltip.Floating>
 
-      {/* Modal contents. keepMounted makes state changes (eg zoom) to the plot
-      persistent. */}
       <Modal opened={opened} onClose={close} size="xl" keepMounted>
-        {/* <UplotWithAspect
-          x_data={x_data}
-          y_data={y_data}
-        /> */}
+        <div ref={modalRef} style={{ width: "100%" }}>
+          <UplotReact 
+            options={modal_options} 
+            data={data} 
+            onCreate={(chart) => {}} 
+            onDelete={(chart) => {}} 
+          />
+        </div>
       </Modal>
     </Box>
   );

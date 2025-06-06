@@ -809,17 +809,19 @@ class GuiApi:
         # <link rel="stylesheet" href="https://unpkg.com/uplot@1.6.24/dist/uPlot.min.css">
         # <script src="https://unpkg.com/uplot@1.6.24/dist/uPlot.iife.min.js"></script>
         if not self._setup_uplot_css:
-            uplot_css = "https://unpkg.com/uplot@1.6.24/dist/uPlot.min.css"
-            self._websock_interface.queue_message(
-                _messages.RunJavascriptMessage(source=uplot_css)
-            )
+            print("FAKE setup uplot css")
+            # uplot_css = "https://unpkg.com/uplot@1.6.24/dist/uPlot.min.css"
+            # self._websock_interface.queue_message(
+            #     _messages.RunJavascriptMessage(source=uplot_css)
+            # )
             self._setup_uplot_css = True
 
         if not self._setup_uplot_js:
-            uplot_js = "https://unpkg.com/uplot@1.6.24/dist/uPlot.iife.min.js"
-            self._websock_interface.queue_message(
-                _messages.RunJavascriptMessage(source=uplot_js)
-            )
+            print("FAKE setup uplot js")
+            # uplot_js = "https://unpkg.com/uplot@1.6.24/dist/uPlot.iife.min.js"
+            # self._websock_interface.queue_message(
+            #     _messages.RunJavascriptMessage(source=uplot_js)
+            # )
             self._setup_uplot_js = True
 
         # Convert numpy arrays to regular Python lists with float values

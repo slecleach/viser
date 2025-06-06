@@ -41,8 +41,8 @@ def main() -> None:
         )
 
         for j in range(50):
-            uplot_handle.x_data = x_data
-            uplot_handle.y_data = y_data + 0.03 * j
+            # uplot_handle.x_data = x_data
+            # uplot_handle.y_data = y_data + 0.03 * j
             time.sleep(0.02)
 
         handles.append(uplot_handle)
