@@ -140,11 +140,18 @@ export default function UplotComponent({
   const { width: modalWidth } = useElementSize({ ref: modalRef });
   const plotRef = React.useRef<uPlot | null>(null);
   const modalPlotRef = React.useRef<uPlot | null>(null);
+  const animationFrameRef = React.useRef<number>();
+  const lastDataRef = React.useRef<uPlot.AlignedData | null>(null);
 
   // Log initial mount
   React.useEffect(() => {
     console.warn("UplotComponent mounted");
-    return () => console.warn("UplotComponent unmounted");
+    return () => {
+      console.warn("UplotComponent unmounted");
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
   }, []);
 
   // Update plot data when props change
@@ -161,20 +168,35 @@ export default function UplotComponent({
       ...y_data.map(y => new Float32Array(y))
     ];
 
-    if (plotRef.current) {
-      try {
-        plotRef.current.setData(newData);
-      } catch (e) {
-        console.error("Error updating main plot:", e);
+    lastDataRef.current = newData;
+
+    function update() {
+      if (plotRef.current && lastDataRef.current) {
+        try {
+          plotRef.current.setData(lastDataRef.current);
+        } catch (e) {
+          console.error("Error updating main plot:", e);
+        }
       }
-    }
-    if (modalPlotRef.current) {
-      try {
-        modalPlotRef.current.setData(newData);
-      } catch (e) {
-        console.error("Error updating modal plot:", e);
+      if (modalPlotRef.current && lastDataRef.current) {
+        try {
+          modalPlotRef.current.setData(lastDataRef.current);
+        } catch (e) {
+          console.error("Error updating modal plot:", e);
+        }
       }
+      animationFrameRef.current = requestAnimationFrame(update);
     }
+
+    // Start the animation frame loop
+    animationFrameRef.current = requestAnimationFrame(update);
+
+    // Cleanup function
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
   }, [x_data, y_data]);
 
   const options: uPlot.Options = {
@@ -198,30 +220,34 @@ export default function UplotComponent({
         label: `Trajectory ${i + 1}`,
       })),
     ],
+    cursor: {
+      show: true,
+      points: {
+        show: true,
+        size: 5,
+      },
+      drag: {
+        setScale: true,
+      },
+    },
+    hooks: {
+      setCursor: [
+        (u) => {
+          // This hook is called when the cursor position changes
+          // We can use it to ensure the cursor state is maintained
+          return () => {
+            // Cleanup function
+          };
+        }
+      ]
+    }
   };
 
   // Use a fixed width for the modal plot initially, then update when the modal is opened
   const modal_options: uPlot.Options = {
-    width: opened ? (modalWidth || 700) : 700,
-    height: opened ? ((modalWidth || 700) * 0.6) : 420,
-    scales: {
-      x: {
-        time: false,
-        range: (u: uPlot, min: number, max: number): [number, number] => [min, max],
-      },
-      y: {
-        range: (u: uPlot, min: number, max: number): [number, number] => [min, max],
-      },
-    },
-    axes: [{}],
-    series: [
-      {}, // x-axis
-      ...x_data.map((_, i) => ({
-        stroke: ['blue', 'red', 'green', 'purple', 'orange', 'brown', 'pink', 'gray'][i % 8],
-        width: 2,
-        label: `Trajectory ${i + 1}`,
-      })),
-    ],
+    ...options,
+    width: opened ? (modalWidth || 650) : 650,
+    height: opened ? ((modalWidth || 650) * 0.6) : 650 * 0.6,
   };
 
   const initialData: uPlot.AlignedData = [
@@ -231,6 +257,7 @@ export default function UplotComponent({
 
   return (
     <Box>
+      {/* Draw static plot in the controlpanel, which can be clicked. */}
       <Tooltip.Floating zIndex={100} label={"Click to expand"}>
         <Box
           style={{
@@ -244,10 +271,7 @@ export default function UplotComponent({
             ref={ref}
             className={folderWrapper}
             withBorder
-            style={{
-              position: "relative",
-              width: "95%",
-            }}
+            style={{ position: "relative" }}
           >
             <UplotReact 
               options={options} 
@@ -265,23 +289,27 @@ export default function UplotComponent({
         </Box>
       </Tooltip.Floating>
 
-      <Modal opened={opened} onClose={close} size="xl">
-        <Modal.Body>
-          <Box ref={modalRef}>
-            <UplotReact 
-              options={modal_options} 
-              data={initialData} 
-              onCreate={(chart) => {
-                modalPlotRef.current = chart;
-              }} 
-              onDelete={(chart) => {
-                if (modalPlotRef.current === chart) {
-                  modalPlotRef.current = null;
-                }
-              }} 
-            />
-          </Box>
-        </Modal.Body>
+      {/* Modal contents. keepMounted makes state changes (eg zoom) to the plot persistent. */}
+      <Modal opened={opened} onClose={close} size="xl" keepMounted>
+        <Paper
+          ref={modalRef}
+          className={folderWrapper}
+          withBorder
+          style={{ position: "relative" }}
+        >
+          <UplotReact 
+            options={modal_options} 
+            data={initialData} 
+            onCreate={(chart) => {
+              modalPlotRef.current = chart;
+            }} 
+            onDelete={(chart) => {
+              if (modalPlotRef.current === chart) {
+                modalPlotRef.current = null;
+              }
+            }} 
+          />
+        </Paper>
       </Modal>
     </Box>
   );

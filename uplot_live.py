@@ -24,7 +24,7 @@ import viser
 # make sure you can scroll down to lower plots DONE
 # make sure you can enlarge the plot
 # make sure you can hover over the plot
-# remove legend and fix appearance
+# remove legend and fix appearance [xlim, ylim, title, legend]
 # pass options from python to the plot 
 # cursor focus https://leeoniya.github.io/uPlot/demos/focus-cursor.html
 # create an alignedData class to ship the data with only one handle update
@@ -41,7 +41,7 @@ def main() -> None:
 
     Ntrajs = 4
     Nplots = 20
-    time_step = 0.001
+    time_step = 0.9
     Nhorizon = 40
     time_value = 0.0
     Nupdates = int(20 / time_step)
@@ -71,7 +71,7 @@ def main() -> None:
         new_y = np.sin(frequency * 2 * np.pi * new_x_data[:, -1:] + np.random.randn(Ntrajs, 1) * 0.5)
         new_y_data = np.concatenate((y_data[:, 1:], new_y), axis=-1)
 
-        for handle in handles[0:]:
+        for handle in handles[0:4]:
             handle.x_data = [[float(x) for x in new_x_data[i]] for i in range(Ntrajs)]
             handle.y_data = [[float(y) for y in new_y_data[i]] for i in range(Ntrajs)]
         time.sleep(time_step)
