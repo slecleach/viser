@@ -22,11 +22,13 @@ import viser
 # remove useless prints DONE
 
 # make sure you can enlarge the plot
-# make sure you can scroll down to lower plots
+# make sure you can scroll down to lower plots DONE
 # make sure you can hover over the plot
 # remove legend and fix appearance
 # pass options from python to the plot 
 # cursor focus https://leeoniya.github.io/uPlot/demos/focus-cursor.html
+# create an alignedData class to ship the data with only one handle update
+
 
 
 # GuiUplotHandle
@@ -39,7 +41,7 @@ def main() -> None:
 
     Ntrajs = 4
     Nplots = 20
-    time_step = 0.01
+    time_step = 0.001
     Nhorizon = 40
     time_value = 0.0
     Nupdates = int(20 / time_step)

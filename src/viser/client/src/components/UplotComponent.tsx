@@ -164,7 +164,7 @@ export default function UplotComponent({
 
     // Add a series for each trajectory with different colors
     const colors = ['blue', 'red', 'green', 'purple', 'orange', 'brown', 'pink', 'gray'];
-    for (let i = 0; i < x_data.length; i++) {
+    for (let i = 0; i < y_data.length; i++) {
       series.push({
         stroke: colors[i % colors.length],
         width: 2,
