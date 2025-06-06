@@ -100,21 +100,60 @@ const UplotWithAspect = React.memo(function UplotWithAspect({
 export default function UplotComponent({
   props: {x_data, y_data },
 }: GuiUplotMessage) {
-  // Create a modal with the plot, and a button to open it.
+  console.warn("UplotComponent render with props:", { x_data, y_data });
+
   const [opened, { open, close }] = useDisclosure(false);
   const { ref, width } = useElementSize();
   const modalRef = React.useRef<HTMLDivElement>(null);
   const { width: modalWidth } = useElementSize({ ref: modalRef });
+  const plotRef = React.useRef<uPlot | null>(null);
+  const modalPlotRef = React.useRef<uPlot | null>(null);
+  const [updateKey, setUpdateKey] = React.useState(0);
 
-  // Convert data to the format uPlot expects
-  const data: uPlot.AlignedData = [
-    new Float64Array(x_data),
-    new Float64Array(y_data)
-  ];
+  // Log initial mount
+  React.useEffect(() => {
+    console.warn("UplotComponent mounted");
+    return () => console.warn("UplotComponent unmounted");
+  }, []);
+
+  // Update plot data when props change
+  React.useEffect(() => {
+    console.warn("Data changed:", {
+      x_data_length: x_data.length,
+      y_data_length: y_data.length,
+      x_data_sample: x_data.slice(0, 3),
+      y_data_sample: y_data.slice(0, 3)
+    });
+
+    const newData: uPlot.AlignedData = [
+      new Float64Array(x_data),
+      new Float64Array(y_data)
+    ];
+
+    if (plotRef.current) {
+      console.warn("Updating main plot data");
+      try {
+        plotRef.current.setData(newData);
+      } catch (e) {
+        console.error("Error updating main plot:", e);
+      }
+    }
+    if (modalPlotRef.current) {
+      console.warn("Updating modal plot data");
+      try {
+        modalPlotRef.current.setData(newData);
+      } catch (e) {
+        console.error("Error updating modal plot:", e);
+      }
+    }
+
+    // Force re-render
+    setUpdateKey(prev => prev + 1);
+  }, [x_data, y_data]);
 
   const options: uPlot.Options = {
-    width: width || 400, // Use container width or fallback to 400
-    height: (width || 400) * 0.6, // Maintain aspect ratio
+    width: width || 400,
+    height: (width || 400) * 0.6,
     scales: {
       x: {
         time: false,
@@ -129,13 +168,14 @@ export default function UplotComponent({
       {}, // x-axis
       {
         stroke: 'blue',
+        width: 2,
       },
     ],
   };
 
   const modal_options: uPlot.Options = {
-    width: 0.8 * modalWidth || 700, // Use modal width or fallback to 800
-    height: (0.8 * modalWidth || 700) * 0.6, // Maintain aspect ratio
+    width: 0.8 * modalWidth || 700,
+    height: (0.8 * modalWidth || 700) * 0.6,
     scales: {
       x: {
         time: false,
@@ -150,9 +190,20 @@ export default function UplotComponent({
       {}, // x-axis
       {
         stroke: 'blue',
+        width: 2,
       },
     ],
   };
+
+  const initialData: uPlot.AlignedData = [
+    new Float64Array(x_data),
+    new Float64Array(y_data)
+  ];
+
+  console.warn("Rendering with data:", {
+    data_length: initialData[0].length,
+    updateKey
+  });
 
   return (
     <Box>
@@ -175,24 +226,44 @@ export default function UplotComponent({
             }}
           >
             <UplotReact 
+              key={`main-plot-${updateKey}`}
               options={options} 
-              data={data} 
-              onCreate={(chart) => {}} 
-              onDelete={(chart) => {}} 
+              data={initialData} 
+              onCreate={(chart) => {
+                console.log("Main plot created with data length:", initialData[0].length);
+                plotRef.current = chart;
+              }} 
+              onDelete={(chart) => {
+                console.log("Main plot deleted");
+                if (plotRef.current === chart) {
+                  plotRef.current = null;
+                }
+              }} 
             />
           </Paper>
         </Box>
       </Tooltip.Floating>
 
-      <Modal opened={opened} onClose={close} size="xl" keepMounted>
-        <div ref={modalRef} style={{ width: "100%" }}>
-          <UplotReact 
-            options={modal_options} 
-            data={data} 
-            onCreate={(chart) => {}} 
-            onDelete={(chart) => {}} 
-          />
-        </div>
+      <Modal opened={opened} onClose={close} size="xl">
+        <Modal.Body>
+          <Box ref={modalRef}>
+            <UplotReact 
+              key={`modal-plot-${updateKey}`}
+              options={modal_options} 
+              data={initialData} 
+              onCreate={(chart) => {
+                console.log("Modal plot created with data length:", initialData[0].length);
+                modalPlotRef.current = chart;
+              }} 
+              onDelete={(chart) => {
+                console.log("Modal plot deleted");
+                if (modalPlotRef.current === chart) {
+                  modalPlotRef.current = null;
+                }
+              }} 
+            />
+          </Box>
+        </Modal.Body>
       </Modal>
     </Box>
   );

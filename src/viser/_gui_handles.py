@@ -802,6 +802,7 @@ class GuiUplotHandle(_GuiHandle[None], GuiUplotProps):
     @x_data.setter
     def x_data(self, x_data: list[float]) -> None:
         self._x_data = x_data
+        self._queue_update("x_data", x_data)
 
     @property
     def y_data(self) -> list[float]:
@@ -812,6 +813,7 @@ class GuiUplotHandle(_GuiHandle[None], GuiUplotProps):
     @y_data.setter
     def y_data(self, y_data: list[float]) -> None:
         self._y_data = y_data
+        self._queue_update("y_data", y_data)
 
 
 class GuiImageHandle(_GuiHandle[None], GuiImageProps):

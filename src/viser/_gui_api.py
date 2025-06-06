@@ -792,8 +792,8 @@ class GuiApi:
 
     def add_uplot(
         self,
-        x_data: np.ndarray,
-        y_data: np.ndarray,
+        x_data: list[float],
+        y_data: list[float],
     ) -> GuiUplotHandle:
         """Add a uPlot to the GUI. Requires the `uplot` package to be
         installed.
@@ -824,17 +824,14 @@ class GuiApi:
             # )
             self._setup_uplot_js = True
 
-        # Convert numpy arrays to regular Python lists with float values
-        x_data_list = [float(x) for x in x_data]
-        y_data_list = [float(y) for y in y_data]
 
         # After uplot.min.js has been sent, we can send the uplot figure.
         message = _messages.GuiUplotMessage(
             uuid=_make_uuid(),
             container_uuid=self._get_container_uuid(),
             props=_messages.GuiUplotProps(
-                x_data=x_data_list,
-                y_data=y_data_list,
+                x_data=x_data,
+                y_data=y_data,
             ),
         )
         self._websock_interface.queue_message(message)

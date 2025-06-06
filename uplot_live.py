@@ -33,16 +33,20 @@ def main() -> None:
     for i in range(Nupdate):
         x_data = time_value + time_step * np.arange(Nchunk) / Nchunk
         y_data = 10 * np.sin(5 * x_data)
+        x_data = [float(x) for x in x_data]
+        y_data = [float(y) for y in y_data]
 
         t0 = time.time()
+        print(f"Creating plot {i} with initial data:", x_data, y_data)
         uplot_handle = server.gui.add_uplot(
             x_data=x_data,
             y_data=y_data,
         )
 
         for j in range(50):
-            # uplot_handle.x_data = x_data
-            # uplot_handle.y_data = y_data + 0.03 * j
+            print(f"Update {j}:", x_data, [1.0 + 0.2 * j for y in y_data])
+            uplot_handle.x_data = x_data
+            uplot_handle.y_data = [1.0 + 0.2 * j for y in y_data]
             time.sleep(0.02)
 
         handles.append(uplot_handle)
