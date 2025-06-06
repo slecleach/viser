@@ -24,37 +24,40 @@ import viser
 def main() -> None:
     server = viser.ViserServer(port=8100)
 
-    Nupdate = 1
-    time_step = 1.0
-    Nchunk = 10
+    Nplots = 5
+    time_step = 0.01
+    Nhorizon = 100
     time_value = 0.0
+    Nupdates = 5000
+    frequency = 3
 
     handles = []
-    for i in range(Nupdate):
-        x_data = time_value + time_step * np.arange(Nchunk) / Nchunk
-        y_data = 10 * np.sin(5 * x_data)
-        x_data = [float(x) for x in x_data]
-        y_data = [float(y) for y in y_data]
+    for i in range(Nplots):
+        x_data = time_value + time_step * np.arange(Nhorizon)
+        y_data = np.sin(frequency * 2 * np.pi * x_data)
 
         t0 = time.time()
         print(f"Creating plot {i} with initial data:", x_data, y_data)
         uplot_handle = server.gui.add_uplot(
-            x_data=x_data,
-            y_data=y_data,
+            x_data=[float(x) for x in x_data],
+            y_data=[float(y) for y in y_data],
         )
-
-        for j in range(50):
-            print(f"Update {j}:", np.around(np.array(x_data), 2), np.around(np.array([y + idx * 0.2 * j for idx, y in enumerate(y_data)]), 2))
-            uplot_handle.x_data = x_data
-            uplot_handle.y_data = [y + idx * 0.2 * j for idx, y in enumerate(y_data)]
-            time.sleep(0.1)
 
         handles.append(uplot_handle)
         t1 = time.time()
         elapsed = t1 - t0
         print("[sending uplot message] elapsed", elapsed)
+
+    for idx in range(Nupdates):
+        new_x_data = time_value + time_step * np.arange(Nhorizon)
+        new_y_data = np.concatenate((y_data[1:], np.sin(frequency * 2 * np.pi * new_x_data[-1:])))
+        for handle in handles:
+            handle.x_data = [float(x) for x in new_x_data]
+            handle.y_data = [float(y) for y in new_y_data]
         time.sleep(time_step)
         time_value += time_step
+        x_data = new_x_data
+        y_data = new_y_data
 
     input("Press Enter to continue...")
 
