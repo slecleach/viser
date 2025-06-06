@@ -21,8 +21,8 @@ import viser
 # make sure you're only updating a single plot by changing the x_data for one handle DONE
 # remove useless prints DONE
 
-# make sure you can enlarge the plot
 # make sure you can scroll down to lower plots DONE
+# make sure you can enlarge the plot
 # make sure you can hover over the plot
 # remove legend and fix appearance
 # pass options from python to the plot 

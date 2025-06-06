@@ -138,10 +138,8 @@ export default function UplotComponent({
   const { ref, width } = useElementSize();
   const modalRef = React.useRef<HTMLDivElement>(null);
   const { width: modalWidth } = useElementSize({ ref: modalRef });
-  // console.log("modalWidth", modalWidth); # this is alwyas 0
   const plotRef = React.useRef<uPlot | null>(null);
   const modalPlotRef = React.useRef<uPlot | null>(null);
-  const [updateKey, setUpdateKey] = React.useState(0);
 
   // Log initial mount
   React.useEffect(() => {
@@ -157,28 +155,11 @@ export default function UplotComponent({
 
     lastUpdateTime.current = now;
 
-    // Create series data for each trajectory
-    const series: uPlot.Series[] = [
-      {}, // x-axis
-    ];
-
-    // Add a series for each trajectory with different colors
-    const colors = ['blue', 'red', 'green', 'purple', 'orange', 'brown', 'pink', 'gray'];
-    for (let i = 0; i < y_data.length; i++) {
-      series.push({
-        stroke: colors[i % colors.length],
-        width: 2,
-        label: `Trajectory ${i + 1}`,
-      });
-    }
-
     // Create data array with x data and all y data series
     const newData: uPlot.AlignedData = [
       new Float32Array(x_data[0]), // Use first trajectory's x data as x-axis
       ...y_data.map(y => new Float32Array(y))
     ];
-
-    const updateStartTime = Date.now();
 
     if (plotRef.current) {
       try {
@@ -194,11 +175,6 @@ export default function UplotComponent({
         console.error("Error updating modal plot:", e);
       }
     }
-
-    const updateEndTime = Date.now();
-
-    // Force re-render
-    setUpdateKey(prev => prev + 1);
   }, [x_data, y_data]);
 
   const options: uPlot.Options = {
@@ -274,7 +250,6 @@ export default function UplotComponent({
             }}
           >
             <UplotReact 
-              key={`main-plot-${updateKey}`}
               options={options} 
               data={initialData} 
               onCreate={(chart) => {
@@ -294,7 +269,6 @@ export default function UplotComponent({
         <Modal.Body>
           <Box ref={modalRef}>
             <UplotReact 
-              key={`modal-plot-${updateKey}-${opened}`}
               options={modal_options} 
               data={initialData} 
               onCreate={(chart) => {
