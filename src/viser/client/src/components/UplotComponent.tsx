@@ -4,12 +4,18 @@ import { useDisclosure } from "@mantine/hooks";
 import { Modal, Box, Paper, Tooltip } from "@mantine/core";
 import { useElementSize } from "@mantine/hooks";
 import uPlot from "uplot";
+import UplotReact from 'uplot-react';
 import "uplot/dist/uPlot.min.css";
+
+
+
 
 // had to install uplot manually:
 // cd src/viser/client && npm install uplot
+// cd src/viser/client && npm install uplot-react uplot
 
-// When drawing border around the plot, it should be aligned with the folder's.
+
+//  When drawing border around the plot, it should be aligned with the folder's.
 import { folderWrapper } from "./Folder.css";
 
 const UplotWithAspect = React.memo(function UplotWithAspect({
@@ -66,6 +72,12 @@ const UplotWithAspect = React.memo(function UplotWithAspect({
       uplotInstance.current = new uPlot(opts, data, plotRef.current);
     }
 
+
+    const Chart = () => (
+        <UplotReact options={options} data={data} target={target} onCreate={(chart) => {}} onDelete={(chart) => {}} />
+    );
+
+
     // Cleanup on unmount
     return () => {
       if (uplotInstance.current) {
@@ -96,6 +108,35 @@ export default function UplotComponent({
 }: GuiUplotMessage) {
   // Create a modal with the plot, and a button to open it.
   const [opened, { open, close }] = useDisclosure(false);
+
+
+  const data = [
+    [0, 1, 2, 3, 4, 5],
+    [0, 1, 2, 3, 4, 5],
+  ];
+
+  const options = {
+      width: 400,
+      height: 300,
+      scales: {
+          x: {
+              time: false,
+              range: [-0.5, 5.5],
+          },
+          y: {},
+      },
+      axes: [{}],
+      series: [
+          {},
+          {
+              stroke: 'blue',
+          },
+      ],
+  };
+  const { ref, width } = useElementSize();
+
+  const Chart = () => <UplotReact options={options} data={data} onCreate={(chart) => {}} onDelete={(chart) => {}} />;
+
   return (
     <Box>
       {/* Draw static plot in the controlpanel, which can be clicked. */}
@@ -108,20 +149,33 @@ export default function UplotComponent({
           }}
           onClick={open}
         >
-          <UplotWithAspect
+          {/* <UplotWithAspect
             x_data={x_data}
             y_data={y_data}
-          />
+          /> */}
+          {
+            <Paper
+            ref={ref}
+            className={folderWrapper}
+            withBorder
+            style={{
+              position: "relative",
+              width: "95%",
+            }}
+          >
+            <Chart />
+          </Paper>
+          }
         </Box>
       </Tooltip.Floating>
 
       {/* Modal contents. keepMounted makes state changes (eg zoom) to the plot
       persistent. */}
       <Modal opened={opened} onClose={close} size="xl" keepMounted>
-        <UplotWithAspect
+        {/* <UplotWithAspect
           x_data={x_data}
           y_data={y_data}
-        />
+        /> */}
       </Modal>
     </Box>
   );
