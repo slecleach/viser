@@ -22,10 +22,10 @@ import viser
 
 
 def main() -> None:
-    server = viser.ViserServer()
+    server = viser.ViserServer(port=8100)
 
-    Nupdate = 5
-    time_step = 1.1
+    Nupdate = 1
+    time_step = 1.0
     Nchunk = 10
     time_value = 0.0
 
@@ -44,10 +44,10 @@ def main() -> None:
         )
 
         for j in range(50):
-            print(f"Update {j}:", x_data, [1.0 + 0.2 * j for y in y_data])
+            print(f"Update {j}:", np.around(np.array(x_data), 2), np.around(np.array([y + idx * 0.2 * j for idx, y in enumerate(y_data)]), 2))
             uplot_handle.x_data = x_data
-            uplot_handle.y_data = [1.0 + 0.2 * j for y in y_data]
-            time.sleep(0.02)
+            uplot_handle.y_data = [y + idx * 0.2 * j for idx, y in enumerate(y_data)]
+            time.sleep(0.1)
 
         handles.append(uplot_handle)
         t1 = time.time()

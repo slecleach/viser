@@ -102,6 +102,22 @@ export default function UplotComponent({
 }: GuiUplotMessage) {
   console.warn("UplotComponent render with props:", { x_data, y_data });
 
+  // Validate data
+  if (!Array.isArray(x_data) || !Array.isArray(y_data)) {
+    console.error("Invalid data: x_data and y_data must be arrays");
+    return null;
+  }
+
+  if (x_data.length !== y_data.length) {
+    console.error("Invalid data: x_data and y_data must have the same length");
+    return null;
+  }
+
+  if (x_data.length === 0) {
+    console.error("Invalid data: arrays cannot be empty");
+    return null;
+  }
+
   const [opened, { open, close }] = useDisclosure(false);
   const { ref, width } = useElementSize();
   const modalRef = React.useRef<HTMLDivElement>(null);
@@ -125,9 +141,18 @@ export default function UplotComponent({
       y_data_sample: y_data.slice(0, 3)
     });
 
+    // Ensure data is valid before creating Float64Array
+    const validXData = x_data.filter(x => typeof x === 'number' && !isNaN(x));
+    const validYData = y_data.filter(y => typeof y === 'number' && !isNaN(y));
+
+    if (validXData.length === 0 || validYData.length === 0) {
+      console.error("No valid numeric data points found");
+      return;
+    }
+
     const newData: uPlot.AlignedData = [
-      new Float64Array(x_data),
-      new Float64Array(y_data)
+      new Float64Array(validXData),
+      new Float64Array(validYData)
     ];
 
     if (plotRef.current) {
@@ -157,7 +182,7 @@ export default function UplotComponent({
     scales: {
       x: {
         time: false,
-        range: (u: uPlot, min: number, max: number): [number, number] => [-0.5, 5.5],
+        range: (u: uPlot, min: number, max: number): [number, number] => [min, max],
       },
       y: {
         range: (u: uPlot, min: number, max: number): [number, number] => [min, max],
@@ -179,7 +204,7 @@ export default function UplotComponent({
     scales: {
       x: {
         time: false,
-        range: (u: uPlot, min: number, max: number): [number, number] => [-0.5, 5.5],
+        range: (u: uPlot, min: number, max: number): [number, number] => [min, max],
       },
       y: {
         range: (u: uPlot, min: number, max: number): [number, number] => [min, max],
@@ -195,9 +220,18 @@ export default function UplotComponent({
     ],
   };
 
+  // Ensure data is valid before creating Float64Array
+  const validXData = x_data.filter(x => typeof x === 'number' && !isNaN(x));
+  const validYData = y_data.filter(y => typeof y === 'number' && !isNaN(y));
+
+  if (validXData.length === 0 || validYData.length === 0) {
+    console.error("No valid numeric data points found");
+    return null;
+  }
+
   const initialData: uPlot.AlignedData = [
-    new Float64Array(x_data),
-    new Float64Array(y_data)
+    new Float64Array(validXData),
+    new Float64Array(validYData)
   ];
 
   console.warn("Rendering with data:", {
