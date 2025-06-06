@@ -8,8 +8,6 @@ import UplotReact from 'uplot-react';
 import "uplot/dist/uPlot.min.css";
 
 
-
-
 // had to install uplot manually:
 // cd src/viser/client && npm install uplot
 // cd src/viser/client && npm install uplot-react uplot
@@ -34,8 +32,8 @@ const UplotWithAspect = React.memo(function UplotWithAspect({
   React.useEffect(() => {
     if (!width || !plotRef.current) return;
 
-    console.log("[UplotWithAspect] Starting initialization with width:", width);
-    console.log("[UplotWithAspect] Data:", { x_data, y_data });
+    // console.log("[UplotWithAspect] Starting initialization with width:", width);
+    // console.log("[UplotWithAspect] Data:", { x_data, y_data });
 
     const opts: uPlot.Options = {
       width: width,
@@ -64,10 +62,10 @@ const UplotWithAspect = React.memo(function UplotWithAspect({
 
     // If we already have a plot instance, just update the data
     if (uplotInstance.current) {
-      console.log("[UplotWithAspect] Updating existing plot");
+      // console.log("[UplotWithAspect] Updating existing plot");
       uplotInstance.current.setData(data);
     } else {
-      console.log("[UplotWithAspect] Creating new plot");
+      // console.log("[UplotWithAspect] Creating new plot");
       // Create new uPlot instance
       uplotInstance.current = new uPlot(opts, data, plotRef.current);
     }
@@ -81,7 +79,7 @@ const UplotWithAspect = React.memo(function UplotWithAspect({
     };
   }, [width, x_data, y_data]);
 
-  console.log("[UplotWithAspect] Return statement");
+  // console.log("[UplotWithAspect] Return statement");
   return (
     <Paper
       ref={ref}
@@ -100,7 +98,9 @@ const UplotWithAspect = React.memo(function UplotWithAspect({
 export default function UplotComponent({
   props: {x_data, y_data },
 }: GuiUplotMessage) {
-  console.warn("UplotComponent render with props:", { x_data, y_data });
+  // Add timing state
+  const lastUpdateTime = React.useRef<number>(Date.now());
+  const updateCount = React.useRef<number>(0);
 
   // Validate data
   if (!Array.isArray(x_data) || !Array.isArray(y_data)) {
@@ -109,19 +109,36 @@ export default function UplotComponent({
   }
 
   if (x_data.length !== y_data.length) {
-    console.error("Invalid data: x_data and y_data must have the same length");
+    console.error("Invalid data: x_data and y_data must have the same number of trajectories");
     return null;
   }
 
   if (x_data.length === 0) {
-    console.error("Invalid data: arrays cannot be empty");
+    console.error("Invalid data: no trajectories provided");
     return null;
+  }
+
+  // Validate each trajectory
+  for (let i = 0; i < x_data.length; i++) {
+    if (!Array.isArray(x_data[i]) || !Array.isArray(y_data[i])) {
+      console.error(`Invalid data: trajectory ${i} must be arrays`);
+      return null;
+    }
+    if (x_data[i].length !== y_data[i].length) {
+      console.error(`Invalid data: trajectory ${i} x and y data must have the same length`);
+      return null;
+    }
+    if (x_data[i].length === 0) {
+      console.error(`Invalid data: trajectory ${i} cannot be empty`);
+      return null;
+    }
   }
 
   const [opened, { open, close }] = useDisclosure(false);
   const { ref, width } = useElementSize();
   const modalRef = React.useRef<HTMLDivElement>(null);
   const { width: modalWidth } = useElementSize({ ref: modalRef });
+  // console.log("modalWidth", modalWidth); # this is alwyas 0
   const plotRef = React.useRef<uPlot | null>(null);
   const modalPlotRef = React.useRef<uPlot | null>(null);
   const [updateKey, setUpdateKey] = React.useState(0);
@@ -134,29 +151,36 @@ export default function UplotComponent({
 
   // Update plot data when props change
   React.useEffect(() => {
-    console.warn("Data changed:", {
-      x_data_length: x_data.length,
-      y_data_length: y_data.length,
-      x_data_sample: x_data.slice(0, 3),
-      y_data_sample: y_data.slice(0, 3)
-    });
+    const now = Date.now();
+    const timeSinceLastUpdate = now - lastUpdateTime.current;
+    updateCount.current += 1;
 
-    // Ensure data is valid before creating Float64Array
-    const validXData = x_data.filter(x => typeof x === 'number' && !isNaN(x));
-    const validYData = y_data.filter(y => typeof y === 'number' && !isNaN(y));
+    lastUpdateTime.current = now;
 
-    if (validXData.length === 0 || validYData.length === 0) {
-      console.error("No valid numeric data points found");
-      return;
-    }
-
-    const newData: uPlot.AlignedData = [
-      new Float64Array(validXData),
-      new Float64Array(validYData)
+    // Create series data for each trajectory
+    const series: uPlot.Series[] = [
+      {}, // x-axis
     ];
 
+    // Add a series for each trajectory with different colors
+    const colors = ['blue', 'red', 'green', 'purple', 'orange', 'brown', 'pink', 'gray'];
+    for (let i = 0; i < x_data.length; i++) {
+      series.push({
+        stroke: colors[i % colors.length],
+        width: 2,
+        label: `Trajectory ${i + 1}`,
+      });
+    }
+
+    // Create data array with x data and all y data series
+    const newData: uPlot.AlignedData = [
+      new Float32Array(x_data[0]), // Use first trajectory's x data as x-axis
+      ...y_data.map(y => new Float32Array(y))
+    ];
+
+    const updateStartTime = Date.now();
+
     if (plotRef.current) {
-      console.warn("Updating main plot data");
       try {
         plotRef.current.setData(newData);
       } catch (e) {
@@ -164,13 +188,14 @@ export default function UplotComponent({
       }
     }
     if (modalPlotRef.current) {
-      console.warn("Updating modal plot data");
       try {
         modalPlotRef.current.setData(newData);
       } catch (e) {
         console.error("Error updating modal plot:", e);
       }
     }
+
+    const updateEndTime = Date.now();
 
     // Force re-render
     setUpdateKey(prev => prev + 1);
@@ -191,16 +216,18 @@ export default function UplotComponent({
     axes: [{}],
     series: [
       {}, // x-axis
-      {
-        stroke: 'blue',
+      ...x_data.map((_, i) => ({
+        stroke: ['blue', 'red', 'green', 'purple', 'orange', 'brown', 'pink', 'gray'][i % 8],
         width: 2,
-      },
+        label: `Trajectory ${i + 1}`,
+      })),
     ],
   };
 
+  // Use a fixed width for the modal plot initially, then update when the modal is opened
   const modal_options: uPlot.Options = {
-    width: 0.8 * modalWidth || 700,
-    height: (0.8 * modalWidth || 700) * 0.6,
+    width: opened ? (modalWidth || 700) : 700,
+    height: opened ? ((modalWidth || 700) * 0.6) : 420,
     scales: {
       x: {
         time: false,
@@ -213,31 +240,18 @@ export default function UplotComponent({
     axes: [{}],
     series: [
       {}, // x-axis
-      {
-        stroke: 'blue',
+      ...x_data.map((_, i) => ({
+        stroke: ['blue', 'red', 'green', 'purple', 'orange', 'brown', 'pink', 'gray'][i % 8],
         width: 2,
-      },
+        label: `Trajectory ${i + 1}`,
+      })),
     ],
   };
 
-  // Ensure data is valid before creating Float64Array
-  const validXData = x_data.filter(x => typeof x === 'number' && !isNaN(x));
-  const validYData = y_data.filter(y => typeof y === 'number' && !isNaN(y));
-
-  if (validXData.length === 0 || validYData.length === 0) {
-    console.error("No valid numeric data points found");
-    return null;
-  }
-
   const initialData: uPlot.AlignedData = [
-    new Float64Array(validXData),
-    new Float64Array(validYData)
+    new Float32Array(x_data[0]), // Use first trajectory's x data as x-axis
+    ...y_data.map(y => new Float32Array(y))
   ];
-
-  console.warn("Rendering with data:", {
-    data_length: initialData[0].length,
-    updateKey
-  });
 
   return (
     <Box>
@@ -264,11 +278,9 @@ export default function UplotComponent({
               options={options} 
               data={initialData} 
               onCreate={(chart) => {
-                console.log("Main plot created with data length:", initialData[0].length);
                 plotRef.current = chart;
               }} 
               onDelete={(chart) => {
-                console.log("Main plot deleted");
                 if (plotRef.current === chart) {
                   plotRef.current = null;
                 }
@@ -282,15 +294,13 @@ export default function UplotComponent({
         <Modal.Body>
           <Box ref={modalRef}>
             <UplotReact 
-              key={`modal-plot-${updateKey}`}
+              key={`modal-plot-${updateKey}-${opened}`}
               options={modal_options} 
               data={initialData} 
               onCreate={(chart) => {
-                console.log("Modal plot created with data length:", initialData[0].length);
                 modalPlotRef.current = chart;
               }} 
               onDelete={(chart) => {
-                console.log("Modal plot deleted");
                 if (modalPlotRef.current === chart) {
                   modalPlotRef.current = null;
                 }

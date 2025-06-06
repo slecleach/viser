@@ -792,8 +792,8 @@ class GuiApi:
 
     def add_uplot(
         self,
-        x_data: list[float],
-        y_data: list[float],
+        x_data: list[list[float]],
+        y_data: list[list[float]],
     ) -> GuiUplotHandle:
         """Add a uPlot to the GUI. Requires the `uplot` package to be
         installed.
