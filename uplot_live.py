@@ -25,10 +25,9 @@ import viser
 # make sure you can enlarge the plot
 # make sure you can hover over the plot
 # remove legend and fix appearance [xlim, ylim, title, legend]
-# pass options from python to the plot 
+# pass options from python to the plot
 # cursor focus https://leeoniya.github.io/uPlot/demos/focus-cursor.html
 # create an alignedData class to ship the data with only one handle update
-
 
 
 # GuiUplotHandle
@@ -40,8 +39,8 @@ def main() -> None:
     server = viser.ViserServer(port=8100)
 
     Ntrajs = 4
-    Nplots = 20
-    time_step = 0.9
+    Nplots = 1
+    time_step = 0.09
     Nhorizon = 40
     time_value = 0.0
     Nupdates = int(20 / time_step)
@@ -51,7 +50,10 @@ def main() -> None:
     for i in range(Nplots):
         x_data = time_value + time_step * np.arange(Nhorizon)
         x_data = np.tile(x_data, (Ntrajs, 1))
-        y_data = np.sin(frequency * 2 * np.pi * x_data) + np.random.randn(Ntrajs, Nhorizon) * 0.5
+        y_data = (
+            np.sin(frequency * 2 * np.pi * x_data)
+            + np.random.randn(Ntrajs, Nhorizon) * 0.5
+        )
 
         t0 = time.time()
         print(f"Creating plot {i} with initial data:", x_data, y_data)
@@ -68,7 +70,10 @@ def main() -> None:
     for idx in range(Nupdates):
         new_x_data = time_value + time_step * np.arange(Nhorizon)
         new_x_data = np.tile(new_x_data, (Ntrajs, 1))
-        new_y = np.sin(frequency * 2 * np.pi * new_x_data[:, -1:] + np.random.randn(Ntrajs, 1) * 0.5)
+        new_y = np.sin(
+            frequency * 2 * np.pi * new_x_data[:, -1:]
+            + np.random.randn(Ntrajs, 1) * 0.5
+        )
         new_y_data = np.concatenate((y_data[:, 1:], new_y), axis=-1)
 
         for handle in handles[0:4]:
