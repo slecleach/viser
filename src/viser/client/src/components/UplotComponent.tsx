@@ -16,7 +16,7 @@ const PlotData = React.memo(function PlotData({
   data: number[][]; // managed by React
   mode?: "main" | "modal";
 }) {
-
+  // Box size change -> width value change -> plot rerender trigger.
   const { ref: containerSizeRef, width: containerWidth } = useElementSize();
   const plotKey = mode === "main" ? "main-plot" : "modal-plot";
 
@@ -45,10 +45,8 @@ const PlotData = React.memo(function PlotData({
     }
   }, [data]);
 
-  // const width = mode === "main" ? 400 : 800;
-
-  // Shared options factory
-  const sharedOptions = (w: number): uPlot.Options => ({
+  // Options factory
+  const getOptions = (w: number): uPlot.Options => ({
     width: w,
     height: w * 0.6,
     scales: {
@@ -73,17 +71,16 @@ const PlotData = React.memo(function PlotData({
 
   // Options state to support resizing or other changes
   const [options, setOptions] = useState<uPlot.Options>(() =>
-    sharedOptions(containerWidth) // Default width for main plot
+    getOptions(containerWidth) // Default width for main plot
   );
 
   // Update options on container/modal resize
   useEffect(() => {
     if (containerWidth > 0) {
-      setOptions(sharedOptions(containerWidth));
+      setOptions(getOptions(containerWidth));
     }
   }, [containerWidth]);
 
-  // Box size change -> width value change -> plot rerender trigger.
   // const { ref, width } = useElementSize();
 
   return (
@@ -91,7 +88,7 @@ const PlotData = React.memo(function PlotData({
       ref={containerSizeRef}
       className={folderWrapper}
       withBorder
-      style={{ position: "relative", width: "100%" }}
+      style={{ position: "relative"}}
     >
       <UplotReact
         key={plotKey}
@@ -115,10 +112,10 @@ export default function UplotComponent({
   // Create a modal with the plot, and a button to open it.
   const [opened, { open, close }] = useDisclosure(false);
 
-  // Convert inputs to Float64Array once per update
+  // Convert inputs to Float32Array once per update
   const alignedData = useMemo<uPlot.AlignedData>(() => {
-    const y = aligned_data.map((traj) => new Float64Array(traj));
-    return [...y];
+    const traj = aligned_data.map((traj) => new Float32Array(traj));
+    return [...traj];
   }, [aligned_data]);
 
   // Data state managed by React
