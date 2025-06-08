@@ -38,9 +38,9 @@ import viser
 def main() -> None:
     server = viser.ViserServer(port=8100)
 
-    Ntrajs = 4
-    Nplots = 1
-    time_step = 0.09
+    Ntrajs = 40
+    Nplots = 10
+    time_step = 0.0009
     Nhorizon = 40
     time_value = 0.0
     Nupdates = int(20 / time_step)
