@@ -38,8 +38,8 @@ import viser
 def main() -> None:
     server = viser.ViserServer(port=8100)
 
-    Ntrajs = 40
-    Nplots = 10
+    Ntrajs = 4
+    Nplots = 100
     time_step = 0.0009
     Nhorizon = 50
     time_value = 0.0
@@ -78,7 +78,7 @@ def main() -> None:
         new_y_data = np.concatenate((y_data[:, 1:], new_y), axis=-1)
         aligned_data = np.concatenate((new_x_data[0:1, :], new_y_data), axis=0)
 
-        for handle in handles[0:4]:
+        for handle in handles[0:20]:
             handle.aligned_data = [
                 [float(y) for y in aligned_data[i]] for i in range(Ntrajs + 1)
             ]

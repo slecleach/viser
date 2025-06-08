@@ -8,12 +8,16 @@ import { useDisclosure, useElementSize } from "@mantine/hooks";
 import { GuiUplotMessage } from "../WebsocketMessages";
 import { folderWrapper } from "./Folder.css";
 
+
+
+
+
+
+
 export default function UplotComponent({
   props: { aligned_data },
 }: GuiUplotMessage) {
   const [opened, { open, close }] = useDisclosure(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
   const { ref: containerSizeRef, width: containerWidth } = useElementSize();
   const { ref: modalSizeRef, width: modalWidth } = useElementSize();
 
