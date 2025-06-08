@@ -483,7 +483,6 @@ export interface GuiUplotMessage {
   uuid: string;
   container_uuid: string;
   props: {
-    x_data: number[][];
     y_data: number[][];
   };
 }

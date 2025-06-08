@@ -1013,8 +1013,6 @@ class GuiPlotlyMessage(_CreateGuiComponentMessage):
 
 @dataclasses.dataclass
 class GuiUplotProps:
-    x_data: list[list[float]]
-    """List of x-data points for each trace."""
     y_data: list[list[float]]
     """List of y-data points for each trace."""
 

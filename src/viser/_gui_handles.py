@@ -786,23 +786,9 @@ class GuiPlotlyHandle(_GuiHandle[None], GuiPlotlyProps):
 class GuiUplotHandle(_GuiHandle[None], GuiUplotProps):
     """Handle for updating and removing Uplot figures."""
 
-    def __init__(
-        self, _impl: _GuiHandleState, _x_data: list[list[float]], _y_data: list[list[float]]
-    ):
+    def __init__(self, _impl: _GuiHandleState, _y_data: list[list[float]]):
         super().__init__(_impl=_impl)
-        self._x_data = _x_data
         self._y_data = _y_data
-
-    @property
-    def x_data(self) -> list[list[float]]:
-        """Current content of this markdown element. Synchronized automatically when assigned."""
-        assert self._x_data is not None
-        return self._x_data
-
-    @x_data.setter
-    def x_data(self, x_data: list[list[float]]) -> None:
-        self._x_data = x_data
-        self._queue_update("x_data", x_data)
 
     @property
     def y_data(self) -> list[list[float]]:

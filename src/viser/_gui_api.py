@@ -792,14 +792,12 @@ class GuiApi:
 
     def add_uplot(
         self,
-        x_data: list[list[float]],
         y_data: list[list[float]],
     ) -> GuiUplotHandle:
         """Add a uPlot to the GUI. Requires the `uplot` package to be
         installed.
 
         Args:
-            x_data: x-data to display.
             y_data: y-data to display.
 
         Returns:
@@ -824,13 +822,11 @@ class GuiApi:
             # )
             self._setup_uplot_js = True
 
-
         # After uplot.min.js has been sent, we can send the uplot figure.
         message = _messages.GuiUplotMessage(
             uuid=_make_uuid(),
             container_uuid=self._get_container_uuid(),
             props=_messages.GuiUplotProps(
-                x_data=x_data,
                 y_data=y_data,
             ),
         )
@@ -844,7 +840,6 @@ class GuiApi:
                 props=message.props,
                 parent_container_id=message.container_uuid,
             ),
-            _x_data=x_data,
             _y_data=y_data,
         )
 

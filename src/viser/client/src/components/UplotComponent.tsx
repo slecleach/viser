@@ -9,7 +9,7 @@ import { GuiUplotMessage } from "../WebsocketMessages";
 import { folderWrapper } from "./Folder.css";
 
 export default function UplotComponent({
-  props: { x_data, y_data },
+  props: { y_data },
 }: GuiUplotMessage) {
   const [opened, { open, close }] = useDisclosure(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -23,10 +23,13 @@ export default function UplotComponent({
 
   // Convert inputs to Float64Array once per update
   const alignedData = useMemo<uPlot.AlignedData>(() => {
-    const x = new Float64Array(x_data[0]);
     const y = y_data.map((traj) => new Float64Array(traj));
-    return [x, ...y];
-  }, [x_data, y_data]);
+    return [...y];
+  }, [y_data]);
+
+  console.log("alignedData", alignedData);
+  console.log("shape alignedData", alignedData.length);
+  console.log("shape y_data", y_data.length);
 
   // Data state managed by React
   const [data, setData] = useState<uPlot.AlignedData>(alignedData);
@@ -74,7 +77,7 @@ export default function UplotComponent({
     axes: [{}],
     series: [
       {},
-      ...y_data.map((_, i) => ({
+      ...y_data.slice(1).map((_, i) => ({
         label: `Trajectory ${i + 1}`,
         stroke: ["red", "green", "blue", "orange", "purple"][i % 5],
         width: 2,

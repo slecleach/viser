@@ -41,7 +41,7 @@ def main() -> None:
     Ntrajs = 40
     Nplots = 10
     time_step = 0.0009
-    Nhorizon = 40
+    Nhorizon = 50
     time_value = 0.0
     Nupdates = int(20 / time_step)
     frequency = 3
@@ -50,16 +50,15 @@ def main() -> None:
     for i in range(Nplots):
         x_data = time_value + time_step * np.arange(Nhorizon)
         x_data = np.tile(x_data, (Ntrajs, 1))
-        y_data = (
-            np.sin(frequency * 2 * np.pi * x_data)
-            + np.random.randn(Ntrajs, Nhorizon) * 0.5
+        y_data = np.sin(
+            frequency * 2 * np.pi * x_data + np.random.randn(Ntrajs, Nhorizon) * 0.5
         )
+        aligned_data = np.concatenate((x_data[0:1, :], y_data), axis=0)
 
         t0 = time.time()
         print(f"Creating plot {i} with initial data:", x_data, y_data)
         uplot_handle = server.gui.add_uplot(
-            x_data=[[float(x) for x in x_data[i]] for i in range(Ntrajs)],
-            y_data=[[float(y) for y in y_data[i]] for i in range(Ntrajs)],
+            y_data=[[float(e) for e in aligned_data[i]] for i in range(Ntrajs + 1)],
         )
 
         handles.append(uplot_handle)
@@ -75,10 +74,12 @@ def main() -> None:
             + np.random.randn(Ntrajs, 1) * 0.5
         )
         new_y_data = np.concatenate((y_data[:, 1:], new_y), axis=-1)
+        aligned_data = np.concatenate((new_x_data[0:1, :], new_y_data), axis=0)
 
         for handle in handles[0:4]:
-            handle.x_data = [[float(x) for x in new_x_data[i]] for i in range(Ntrajs)]
-            handle.y_data = [[float(y) for y in new_y_data[i]] for i in range(Ntrajs)]
+            handle.y_data = [
+                [float(y) for y in aligned_data[i]] for i in range(Ntrajs + 1)
+            ]
         time.sleep(time_step)
         time_value += time_step
         x_data = new_x_data
