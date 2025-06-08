@@ -1013,7 +1013,7 @@ class GuiPlotlyMessage(_CreateGuiComponentMessage):
 
 @dataclasses.dataclass
 class GuiUplotProps:
-    y_data: list[list[float]]
+    aligned_data: list[list[float]]
     """List of y-data points for each trace."""
 
 

@@ -58,7 +58,9 @@ def main() -> None:
         t0 = time.time()
         print(f"Creating plot {i} with initial data:", x_data, y_data)
         uplot_handle = server.gui.add_uplot(
-            y_data=[[float(e) for e in aligned_data[i]] for i in range(Ntrajs + 1)],
+            aligned_data=[
+                [float(e) for e in aligned_data[i]] for i in range(Ntrajs + 1)
+            ],
         )
 
         handles.append(uplot_handle)
@@ -77,7 +79,7 @@ def main() -> None:
         aligned_data = np.concatenate((new_x_data[0:1, :], new_y_data), axis=0)
 
         for handle in handles[0:4]:
-            handle.y_data = [
+            handle.aligned_data = [
                 [float(y) for y in aligned_data[i]] for i in range(Ntrajs + 1)
             ]
         time.sleep(time_step)

@@ -792,13 +792,14 @@ class GuiApi:
 
     def add_uplot(
         self,
-        y_data: list[list[float]],
+        aligned_data: list[list[float]],
     ) -> GuiUplotHandle:
         """Add a uPlot to the GUI. Requires the `uplot` package to be
         installed.
 
         Args:
-            y_data: y-data to display.
+            aligned_data: list of lists of floats, where the first inner list is the
+                x-data and the rest are the y-data, minimum outerlength 2.
 
         Returns:
             A handle that can be used to interact with the GUI element.
@@ -827,7 +828,7 @@ class GuiApi:
             uuid=_make_uuid(),
             container_uuid=self._get_container_uuid(),
             props=_messages.GuiUplotProps(
-                y_data=y_data,
+                aligned_data=aligned_data,
             ),
         )
         self._websock_interface.queue_message(message)
@@ -840,7 +841,7 @@ class GuiApi:
                 props=message.props,
                 parent_container_id=message.container_uuid,
             ),
-            _y_data=y_data,
+            _aligned_data=aligned_data,
         )
 
         return handle
