@@ -484,6 +484,7 @@ export interface GuiUplotMessage {
   container_uuid: string;
   props: {
     aligned_data: number[][];
+    options: { [key: string]: any };
   };
 }
 

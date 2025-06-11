@@ -847,6 +847,7 @@ class GuiApi:
                 parent_container_id=message.container_uuid,
             ),
             _aligned_data=aligned_data,
+            _options=options,
         )
 
         return handle

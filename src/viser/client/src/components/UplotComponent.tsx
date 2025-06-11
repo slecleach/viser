@@ -11,10 +11,12 @@ import { folderWrapper } from "./Folder.css";
 
 const PlotData = React.memo(function PlotData({
   data,
+  options,
   isVisible = true,
   aspectRatio = 0.6,
 }: {
   data: number[][]; // managed by React
+  options: { [key: string]: any };  // Equivalent to Python's dict[str, Any]
   isVisible?: boolean;
   aspectRatio?: number;
 }) {
@@ -62,26 +64,11 @@ const PlotData = React.memo(function PlotData({
       drag: { setScale: true },
       points: { show: true, size: 4 },
     },
-    scales: {
-      x: {
-        time: false,
-        range: (u, min, max) => [min - 0.02, max + 0.02],
-      },
-      y: { range: [-1.2, 1.2] },
-    },
-    axes: [{}],
-    series: [
-      {},
-      ...data.slice(1).map((_, i) => ({
-        label: `Trajectory ${i + 1}`,
-        stroke: ["red", "green", "blue", "orange", "purple"][i % 5],
-        width: 2,
-      })),
-    ],
+    ...options, // merge with user-defined options e.g. scales, axes, series
   });
 
   // Options state to support resizing or other changes
-  const [options, setOptions] = useState<uPlot.Options>(() =>
+  const [uplotOptions, setOptions] = useState<uPlot.Options>(() =>
     getOptions(containerWidth) // Default width for main plot
   );
 
@@ -100,7 +87,7 @@ const PlotData = React.memo(function PlotData({
       style={{ position: "relative"}}
     >
       <UplotReact
-        options={options}
+        options={uplotOptions}
         data={data}
         onCreate={(chart) => (plotRef.current = chart)}
         onDelete={(chart) => {
@@ -112,7 +99,7 @@ const PlotData = React.memo(function PlotData({
 });
 
 export default function UplotComponent({
-  props: { aligned_data },
+  props: { aligned_data, options },
 }: GuiUplotMessage) {
 
   // Create a modal with the plot, and a button to open it.
@@ -138,6 +125,7 @@ export default function UplotComponent({
         <Box onClick={open} style={{ cursor: "pointer", flexShrink: 0 }}>
           <PlotData
             data={data}
+            options={options}
             isVisible={true}
             aspectRatio={0.6}
           />
@@ -147,6 +135,7 @@ export default function UplotComponent({
       <Modal opened={opened} onClose={close} size="xl" keepMounted>
         <PlotData
           data={data}
+          options={options}
           isVisible={opened}
           aspectRatio={0.6}
         />

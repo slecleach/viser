@@ -1015,6 +1015,8 @@ class GuiPlotlyMessage(_CreateGuiComponentMessage):
 class GuiUplotProps:
     aligned_data: list[list[float]]
     """List of y-data points for each trace."""
+    options: dict[str, Any]
+    """Options for the Uplot instance."""
 
 
 @dataclasses.dataclass

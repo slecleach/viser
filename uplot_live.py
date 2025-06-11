@@ -27,6 +27,7 @@ import viser
 # pass options from python to the plot
 # cursor focus https://leeoniya.github.io/uPlot/demos/focus-cursor.html
 # create an alignedData class to ship the data with only one handle update
+# remove _queue_update if possible
 
 # GuiUplotHandle
 # GuiUplotMessage
@@ -44,6 +45,22 @@ def main() -> None:
     Nupdates = int(20 / time_step)
     frequency = 3
 
+    options = {
+        "scales": {"x": {"time": False, "range": [0, 20]}, "y": {"range": [-1.2, 1.2]}},
+        "axes": [{}],
+        "series": [
+            {},
+            *[
+                {
+                    "label": f"Trajectory {i + 1}",
+                    "stroke": ["red", "green", "blue", "orange", "purple"][i % 5],
+                    "width": 2,
+                }
+                for i in range(Ntrajs)
+            ],
+        ],
+    }
+
     handles = []
     for i in range(Nplots):
         x_data = time_value + time_step * np.arange(Nhorizon)
@@ -54,11 +71,12 @@ def main() -> None:
         aligned_data = np.concatenate((x_data[0:1, :], y_data), axis=0)
 
         t0 = time.time()
-        print(f"Creating plot {i} with initial data:", x_data, y_data)
+        # print(f"Creating plot {i} with initial data:", x_data, y_data)
         uplot_handle = server.gui.add_uplot(
             aligned_data=[
                 [float(e) for e in aligned_data[i]] for i in range(Ntrajs + 1)
             ],
+            options=options,
         )
 
         handles.append(uplot_handle)
