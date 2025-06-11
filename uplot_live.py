@@ -22,14 +22,18 @@ import viser
 # make sure you can scroll down to lower plots DONE
 # make sure you can enlarge the plot DONE
 # make sure you can hover over the plot DONE
+# remove legend and fix appearance [xlim, ylim, title, legend, line or area] DONE
+# pass options from python to the plot DONE
+# cursor focus https://leeoniya.github.io/uPlot/demos/focus-cursor.html DONE
+# create an alignedData class to ship the data with only one handle update DONE
+# remove _queue_update if possible DONE
 
 
-# remove legend and fix appearance [xlim, ylim, title, legend, line or area]
-# pass options from python to the plot
-# cursor focus https://leeoniya.github.io/uPlot/demos/focus-cursor.html
-# create an alignedData class to ship the data with only one handle update
-# remove _queue_update if possible
+# investigate how to reduce the font size of the legend
+# add aspect ratio in the handle 0.5H
 # remove the dirty install of uplot and uplot_react
+# clean up example  0.5H
+# clean up the code 1H
 
 
 # GuiUplotHandle
@@ -68,6 +72,7 @@ def main() -> None:
                 for i in range(Ntrajs)
             ],
         ],
+        "legend": {"show": False},
     }
 
     handles = []
