@@ -29,6 +29,8 @@ import viser
 # cursor focus https://leeoniya.github.io/uPlot/demos/focus-cursor.html
 # create an alignedData class to ship the data with only one handle update
 # remove _queue_update if possible
+# remove the dirty install of uplot and uplot_react
+
 
 # GuiUplotHandle
 # GuiUplotMessage
@@ -38,10 +40,10 @@ import viser
 def main() -> None:
     server = viser.ViserServer(port=8100)
 
-    Ntrajs = 4
-    Nplots = 100
-    time_step = 0.001
-    Nhorizon = 50
+    Ntrajs = 8
+    Nplots = 15
+    time_step = 0.01
+    Nhorizon = 150
     time_value = 0.0
     Nupdates = int(20 / time_step)
     frequency = 3
@@ -50,12 +52,9 @@ def main() -> None:
         "scales": {
             "x": {
                 "time": False,
-                "range": [0, 5],  # [type, left-padding, right-padding]
+                "auto": True,
             },
-            "y": {
-                "min": -1.2,
-                "max": 1.2,
-            },
+            "y": {"range": [-1.2, 1.2]},
         },
         "axes": [{}],
         "series": [
@@ -105,16 +104,13 @@ def main() -> None:
         aligned_data = np.concatenate((new_x_data[0:1, :], new_y_data), axis=0)
 
         for handle in handles[0:20]:
-            handle.aligned_data = [
+            list_aligned_data = [
                 [float(y) for y in aligned_data[i]] for i in range(Ntrajs + 1)
             ]
             options = deepcopy(handle.options)
-            options["scales"]["x"]["range"] = [
-                time_value - 0.01,
-                time_value + time_step * Nhorizon + 0.01,
-            ]
-            options["scales"]["y"]["range"] = [-1.2, 1.2]
-            handle.options = options
+            # handle.set_data_and_options(list_aligned_data, options)
+            handle.aligned_data = list_aligned_data
+            # handle.options = options
         time.sleep(time_step)
         time_value += time_step
         x_data = new_x_data

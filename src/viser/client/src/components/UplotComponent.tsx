@@ -74,7 +74,7 @@ const PlotData = React.memo(function PlotData({
     if (containerWidth > 0) {
       setOptions(getOptions(containerWidth));
     }
-  }, [containerWidth]);
+  }, [containerWidth, options]);
 
   return (
     <Paper

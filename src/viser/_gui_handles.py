@@ -818,6 +818,25 @@ class GuiUplotHandle(_GuiHandle[None], GuiUplotProps):
         self._options = options
         self._queue_update("options", options)
 
+    def set_data_and_options(
+        self, aligned_data: list[list[float]], options: dict[str, Any]
+    ) -> None:
+        """Set both the aligned data and options at once, triggering only one client-side update.
+        This is only slightly more efficient than setting each individually. Updating options frequently
+        is discouraged, as it triggers a full re-render of the Uplot figure.
+
+        Args:
+            aligned_data: The new aligned data to set
+            options: The new options to set
+        """
+        self._aligned_data = aligned_data
+        self._options = options
+        self._impl.gui_api._websock_interface.queue_message(
+            GuiUpdateMessage(
+                self._impl.uuid, {"aligned_data": aligned_data, "options": options}
+            )
+        )
+
 
 class GuiImageHandle(_GuiHandle[None], GuiImageProps):
     """Handle for updating and removing images."""
