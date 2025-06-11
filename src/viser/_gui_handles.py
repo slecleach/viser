@@ -786,9 +786,15 @@ class GuiPlotlyHandle(_GuiHandle[None], GuiPlotlyProps):
 class GuiUplotHandle(_GuiHandle[None], GuiUplotProps):
     """Handle for updating and removing Uplot figures."""
 
-    def __init__(self, _impl: _GuiHandleState, _aligned_data: list[list[float]]):
+    def __init__(
+        self,
+        _impl: _GuiHandleState,
+        _aligned_data: list[list[float]],
+        _options: dict[str, Any],
+    ):
         super().__init__(_impl=_impl)
         self._aligned_data = _aligned_data
+        self._options = _options
 
     @property
     def aligned_data(self) -> list[list[float]]:
@@ -800,6 +806,17 @@ class GuiUplotHandle(_GuiHandle[None], GuiUplotProps):
     def aligned_data(self, aligned_data: list[list[float]]) -> None:
         self._aligned_data = aligned_data
         self._queue_update("aligned_data", aligned_data)
+
+    @property
+    def options(self) -> dict[str, Any]:
+        """Current options of this Uplot element. Synchronized automatically when assigned."""
+        assert self._options is not None
+        return self._options
+
+    @options.setter
+    def options(self, options: dict[str, Any]) -> None:
+        self._options = options
+        self._queue_update("options", options)
 
 
 class GuiImageHandle(_GuiHandle[None], GuiImageProps):

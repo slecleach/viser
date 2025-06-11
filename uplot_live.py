@@ -9,26 +9,24 @@ import numpy as np
 import viser
 
 # handle the modal plot DONE
-# handle the main plot reanchoring
-# handle multiple trajectories
+# handle the main plot reanchoring DONE
+# handle multiple trajectories DONE
 # handles number of elements in history DONE
 # handle boundary ylims, xlims
-# rename functions
-
-
+# rename functions DONE
 # plot multiple traj per plot DONE
 # check the effective refresh rate on the browser side DONE
 # make sure you're only updating a single plot by changing the x_data for one handle DONE
 # remove useless prints DONE
-
 # make sure you can scroll down to lower plots DONE
-# make sure you can enlarge the plot
-# make sure you can hover over the plot
-# remove legend and fix appearance [xlim, ylim, title, legend]
+# make sure you can enlarge the plot DONE
+# make sure you can hover over the plot DONE
+
+
+# remove legend and fix appearance [xlim, ylim, title, legend, line or area]
 # pass options from python to the plot
 # cursor focus https://leeoniya.github.io/uPlot/demos/focus-cursor.html
 # create an alignedData class to ship the data with only one handle update
-
 
 # GuiUplotHandle
 # GuiUplotMessage
@@ -40,7 +38,7 @@ def main() -> None:
 
     Ntrajs = 4
     Nplots = 100
-    time_step = 0.0009
+    time_step = 0.001
     Nhorizon = 50
     time_value = 0.0
     Nupdates = int(20 / time_step)
@@ -92,3 +90,43 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+#   const getOptions = (w: number): uPlot.Options => ({
+#     width: w,
+#     height: w * aspectRatio,
+#     cursor: {
+#       show: true,
+#       drag: { setScale: true },
+#       points: { show: true, size: 4 },
+#     },
+#     scales: {
+#       x: {
+#         time: false,
+#         range: (u, min, max) => [min - 0.02, max + 0.02],
+#       },
+#       y: { range: [-1.2, 1.2] },
+#     },
+#     axes: [{}],
+#     series: [
+#       {},
+#       {label: "Trajectory 1", stroke: "red", width: 2},
+#       {label: "Trajectory 2", stroke: "green", width: 2},
+#       {label: "Trajectory 3", stroke: "blue", width: 2},
+#       {label: "Trajectory 4", stroke: "orange", width: 2},
+#       {label: "Trajectory 5", stroke: "orange", width: 2},
+#       // ...data.slice(1).map((_, i) => ({
+#       //   label: `Trajectory ${i + 1}`,
+#       //   stroke: ["red", "green", "blue", "orange", "purple"][i % 5],
+#       //   width: 2,
+#       // })),
+#     ],
+#   });
+
+# num_series = num_traj + 1 works perfectly
+# num series = num traj works perfectly
+# num series = num traj - 1 works # doesn't show the last traj
+# no label works perfectly
+# no width works perfectly
+# empty nothing is shown
+# need stroke to show something

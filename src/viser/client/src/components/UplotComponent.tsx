@@ -11,14 +11,15 @@ import { folderWrapper } from "./Folder.css";
 
 const PlotData = React.memo(function PlotData({
   data,
-  mode = "main",
+  isVisible = true,
+  aspectRatio = 0.6,
 }: {
   data: number[][]; // managed by React
-  mode?: "main" | "modal";
+  isVisible?: boolean;
+  aspectRatio?: number;
 }) {
   // Box size change -> width value change -> plot rerender trigger.
   const { ref: containerSizeRef, width: containerWidth } = useElementSize();
-  const plotKey = mode === "main" ? "main-plot" : "modal-plot";
 
   // Store cursor position to restore after data update
   const lastCursorPos = useRef<{ left: number; top: number } | null>(null);
@@ -26,8 +27,10 @@ const PlotData = React.memo(function PlotData({
   // Store refs to uPlot instances
   const plotRef = useRef<uPlot | null>(null);
 
+
   // When data updates, restore cursor position on the plot instances
   useEffect(() => {
+    if (!isVisible) return; // Skip updates if not visible
     const plot = plotRef.current;
     if (!plot) return;
     // Save last cursor position if available
@@ -43,15 +46,28 @@ const PlotData = React.memo(function PlotData({
     if (lastCursorPos.current) {
       plot.setCursor(lastCursorPos.current);
     }
-  }, [data]);
+  }, [data, isVisible]);
 
-  // Options factory
+  // Number of trajectories
+  const num_traj = data.length - 1;
+
+  // Options factory:
+  // width, height and cursor are managed on the typescript side.
+  // additional options (i.e. scales, axes, series) are managed by the user on the python side.
   const getOptions = (w: number): uPlot.Options => ({
     width: w,
-    height: w * 0.6,
+    height: w * aspectRatio,
+    cursor: {
+      show: true,
+      drag: { setScale: true },
+      points: { show: true, size: 4 },
+    },
     scales: {
-      x: { time: false, range: (u, min, max) => [min, max] },
-      y: { range: (u, min, max) => [min, max] },
+      x: {
+        time: false,
+        range: (u, min, max) => [min - 0.02, max + 0.02],
+      },
+      y: { range: [-1.2, 1.2] },
     },
     axes: [{}],
     series: [
@@ -62,11 +78,6 @@ const PlotData = React.memo(function PlotData({
         width: 2,
       })),
     ],
-    cursor: {
-      show: true,
-      drag: { setScale: true },
-      points: { show: true, size: 4 },
-    },
   });
 
   // Options state to support resizing or other changes
@@ -81,8 +92,6 @@ const PlotData = React.memo(function PlotData({
     }
   }, [containerWidth]);
 
-  // const { ref, width } = useElementSize();
-
   return (
     <Paper
       ref={containerSizeRef}
@@ -91,7 +100,6 @@ const PlotData = React.memo(function PlotData({
       style={{ position: "relative"}}
     >
       <UplotReact
-        key={plotKey}
         options={options}
         data={data}
         onCreate={(chart) => (plotRef.current = chart)}
@@ -102,8 +110,6 @@ const PlotData = React.memo(function PlotData({
     </Paper>
   );
 });
-
-
 
 export default function UplotComponent({
   props: { aligned_data },
@@ -132,7 +138,8 @@ export default function UplotComponent({
         <Box onClick={open} style={{ cursor: "pointer", flexShrink: 0 }}>
           <PlotData
             data={data}
-            mode="main"
+            isVisible={true}
+            aspectRatio={0.6}
           />
         </Box>
       </Tooltip.Floating>
@@ -140,7 +147,8 @@ export default function UplotComponent({
       <Modal opened={opened} onClose={close} size="xl" keepMounted>
         <PlotData
           data={data}
-          mode="modal"
+          isVisible={opened}
+          aspectRatio={0.6}
         />
       </Modal>
     </Box>
