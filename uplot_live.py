@@ -3,6 +3,7 @@
 Example of creating live-updating uplot plots in Viser."""
 
 import time
+from copy import deepcopy
 
 import numpy as np
 
@@ -46,7 +47,16 @@ def main() -> None:
     frequency = 3
 
     options = {
-        "scales": {"x": {"time": False, "range": [0, 20]}, "y": {"range": [-1.2, 1.2]}},
+        "scales": {
+            "x": {
+                "time": False,
+                "range": [0, 5],  # [type, left-padding, right-padding]
+            },
+            "y": {
+                "min": -1.2,
+                "max": 1.2,
+            },
+        },
         "axes": [{}],
         "series": [
             {},
@@ -98,6 +108,13 @@ def main() -> None:
             handle.aligned_data = [
                 [float(y) for y in aligned_data[i]] for i in range(Ntrajs + 1)
             ]
+            options = deepcopy(handle.options)
+            options["scales"]["x"]["range"] = [
+                time_value - 0.01,
+                time_value + time_step * Nhorizon + 0.01,
+            ]
+            options["scales"]["y"]["range"] = [-1.2, 1.2]
+            handle.options = options
         time.sleep(time_step)
         time_value += time_step
         x_data = new_x_data

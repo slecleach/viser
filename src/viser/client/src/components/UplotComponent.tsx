@@ -50,9 +50,6 @@ const PlotData = React.memo(function PlotData({
     }
   }, [data, isVisible]);
 
-  // Number of trajectories
-  const num_traj = data.length - 1;
-
   // Options factory:
   // width, height and cursor are managed on the typescript side.
   // additional options (i.e. scales, axes, series) are managed by the user on the python side.
