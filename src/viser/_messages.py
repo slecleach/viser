@@ -1012,6 +1012,25 @@ class GuiPlotlyMessage(_CreateGuiComponentMessage):
 
 
 @dataclasses.dataclass
+class GuiPlotlyExtendTracesProps:
+    plotly_element_uuids: list[str]
+    """UUIDs of the plotly elements to update."""
+    x_data: list[float]
+    """List of x-data points for each trace."""
+    y_data: list[float]
+    """List of y-data points for each trace."""
+    history_length: int
+    """History length for the plot."""
+
+
+@dataclasses.dataclass
+class GuiPlotlyExtendTracesMessage(Message):
+    # uuid: str
+    container_uuid: str
+    props: GuiPlotlyExtendTracesProps
+
+
+@dataclasses.dataclass
 class GuiImageProps:
     order: float
     """Order value for arranging GUI elements. Synchronized automatically when assigned."""
