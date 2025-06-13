@@ -798,7 +798,7 @@ class GuiUplotHandle(_GuiHandle[None], GuiUplotProps):
 
     @property
     def aligned_data(self) -> list[list[float]]:
-        """Current content of this markdown element. Synchronized automatically when assigned."""
+        """Current aligned data of this Uplot element. Synchronized automatically when assigned."""
         assert self._aligned_data is not None
         return self._aligned_data
 
@@ -809,7 +809,7 @@ class GuiUplotHandle(_GuiHandle[None], GuiUplotProps):
 
     @property
     def options(self) -> dict[str, Any]:
-        """Current options of this Uplot element. Synchronized automatically when assigned."""
+        """Current Uplot options of this Uplot element. Synchronized automatically when assigned."""
         assert self._options is not None
         return self._options
 
@@ -822,8 +822,8 @@ class GuiUplotHandle(_GuiHandle[None], GuiUplotProps):
         self, aligned_data: list[list[float]], options: dict[str, Any]
     ) -> None:
         """Set both the aligned data and options at once, triggering only one client-side update.
-        This is only slightly more efficient than setting each individually. Updating options frequently
-        is discouraged, as it triggers a full re-render of the Uplot figure.
+        This is more efficient than setting aligned data and options individually. 
+        Updating options frequently is discouraged, as it triggers a full re-render of the Uplot figure.
 
         Args:
             aligned_data: The new aligned data to set
