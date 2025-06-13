@@ -85,7 +85,6 @@ def main() -> None:
         aligned_data = np.concatenate((x_data[0:1, :], y_data), axis=0)
 
         t0 = time.time()
-        # print(f"Creating plot {i} with initial data:", x_data, y_data)
         uplot_handle = server.gui.add_uplot(
             aligned_data=[
                 [float(e) for e in aligned_data[i]] for i in range(Ntrajs + 1)
@@ -98,7 +97,9 @@ def main() -> None:
         elapsed = t1 - t0
         print("[sending uplot message] elapsed", elapsed)
 
+    t_start = time.time()
     for idx in range(Nupdates):
+        t0 = time.time()
         new_x_data = time_value + time_step * np.arange(Nhorizon)
         new_x_data = np.tile(new_x_data, (Ntrajs, 1))
         new_y = np.sin(
@@ -113,13 +114,21 @@ def main() -> None:
                 [float(y) for y in aligned_data[i]] for i in range(Ntrajs + 1)
             ]
             options = deepcopy(handle.options)
-            options["scales"]["y"]["range"] = [-1.2 - 0.01 * idx, 1.2 + 0.01 * idx]
-            handle.update_plot(list_aligned_data, options, aspect=0.25 + 0.001 * idx)
-            # handle.update_plot(list_aligned_data, options)
-            # handle.aligned_data = list_aligned_data
+            options["scales"]["y"]["range"] = [-1.2 - 0.001 * idx, 1.2 + 0.001 * idx]
+            # handle.update_plot(list_aligned_data, options, aspect=0.25 + 0.001 * idx)
+            handle.aligned_data = list_aligned_data
             # handle.options = options
-            # handle.aspect = 0.5 + 0.001 * idx
-        time.sleep(time_step)
+            # handle.aspect = 0.5 + 0.2 * np.sin(0.005 * idx)
+
+        t1 = time.time()
+        elapsed = t1 - t0
+        print(
+            "[updating plots] elapsed",
+            np.around(elapsed, 4),
+            "time",
+            np.around(time.time() - t_start, 2),
+        )
+        time.sleep(max(0, time_step - elapsed))
         time_value += time_step
         x_data = new_x_data
         y_data = new_y_data
@@ -129,43 +138,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
-#   const getOptions = (w: number): uPlot.Options => ({
-#     width: w,
-#     height: w * aspectRatio,
-#     cursor: {
-#       show: true,
-#       drag: { setScale: true },
-#       points: { show: true, size: 4 },
-#     },
-#     scales: {
-#       x: {
-#         time: false,
-#         range: (u, min, max) => [min - 0.02, max + 0.02],
-#       },
-#       y: { range: [-1.2, 1.2] },
-#     },
-#     axes: [{}],
-#     series: [
-#       {},
-#       {label: "Trajectory 1", stroke: "red", width: 2},
-#       {label: "Trajectory 2", stroke: "green", width: 2},
-#       {label: "Trajectory 3", stroke: "blue", width: 2},
-#       {label: "Trajectory 4", stroke: "orange", width: 2},
-#       {label: "Trajectory 5", stroke: "orange", width: 2},
-#       // ...data.slice(1).map((_, i) => ({
-#       //   label: `Trajectory ${i + 1}`,
-#       //   stroke: ["red", "green", "blue", "orange", "purple"][i % 5],
-#       //   width: 2,
-#       // })),
-#     ],
-#   });
-
-# num_series = num_traj + 1 works perfectly
-# num series = num traj works perfectly
-# num series = num traj - 1 works # doesn't show the last traj
-# no label works perfectly
-# no width works perfectly
-# empty nothing is shown
-# need stroke to show something
