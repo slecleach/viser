@@ -798,14 +798,13 @@ class GuiApi:
         Args:
             aligned_data: list of lists of floats, where the first inner list is the
                 x-data and the rest are the y-data, minimum outerlength 2.
-            options: uPlot options including among others series, axes, scales but
-                excluding 'width', 'height' and 'cursor' which are handled on the
-                client side.
+            options: uPlot options as a dictionary, including among others keys:
+                'series', 'axes', 'scales' but excluding 'width', 'height' and 'cursor'
+                which are handled on the client side.
         Returns:
             A handle that can be used to interact with the GUI element.
         """
 
-        # After uplot.min.js has been sent, we can send the uplot figure.
         message = _messages.GuiUplotMessage(
             uuid=_make_uuid(),
             container_uuid=self._get_container_uuid(),
