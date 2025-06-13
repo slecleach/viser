@@ -46,8 +46,6 @@ def main() -> None:
         "legend": {"show": True},
     }
 
-
-
     current_time = 0.0
     horizon = 100
     time_step = 1.0 / 60.0
@@ -74,3 +72,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
