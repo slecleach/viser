@@ -17,5 +17,5 @@ htmlcov
 build
 src/viser/client/build
 src/viser/client/.nodeenv
-
+.venv
 **/.claude/settings.local.json
