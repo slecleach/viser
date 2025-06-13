@@ -9,7 +9,6 @@ import { GuiUplotMessage } from "../WebsocketMessages";
 import { folderWrapper } from "./Folder.css";
 
 
-
 const PlotData = React.memo(function PlotData({
   data,
   options,

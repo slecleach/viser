@@ -790,15 +790,16 @@ class GuiApi:
 
     def add_uplot(
         self,
-        aligned_data: list[list[float]],
+        aligned_data: np.ndarray,
         options: dict[str, Any],
         aspect: float = 1.0,
     ) -> GuiUplotHandle:
         """Add a uPlot to the GUI. Requires the `uplot` package to be
         installed.
         Args:
-            aligned_data: list of lists of floats, where the first inner list is the
-                x-data and the rest are the y-data, minimum outerlength 2.
+            aligned_data: 2D array of floats [num_trajectories + 1, num_points],
+                where the first row is the x-data and the rest are the y-data, minimum
+                first dimension is 2.
             options: uPlot options as a dictionary, including among others keys:
                 'series', 'axes', 'scales' but excluding 'width', 'height' and 'cursor'
                 which are handled on the client side.
@@ -806,6 +807,9 @@ class GuiApi:
         Returns:
             A handle that can be used to interact with the GUI element.
         """
+
+        assert aligned_data.ndim == 2, "aligned_data must be a 2D array"
+        assert aligned_data.shape[0] >= 2, "aligned_data must have at least 2 rows"
 
         message = _messages.GuiUplotMessage(
             uuid=_make_uuid(),
