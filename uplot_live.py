@@ -72,7 +72,7 @@ def main() -> None:
                 for i in range(Ntrajs)
             ],
         ],
-        "legend": {"show": False},
+        "legend": {"show": True},
     }
 
     handles = []
