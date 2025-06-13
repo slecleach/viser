@@ -45,7 +45,6 @@ def main() -> None:
         "legend": {"show": True},
     }
 
-
     x_data = time_step * np.arange(num_points)
     y_data = np.vstack([y0(x_data) for _ in range(num_trajectories)])
     print("y_data.shape", y_data.shape)
@@ -56,11 +55,13 @@ def main() -> None:
 
     uplot_handles = []
     for _ in range(num_plots):
-        uplot_handles.append(server.gui.add_uplot(
-            aligned_data=aligned_data,
-            options=options,
-            aspect=1.0,
-        ))
+        uplot_handles.append(
+            server.gui.add_uplot(
+                aligned_data=aligned_data,
+                options=options,
+                aspect=1.0,
+            )
+        )
 
     while True:
         # Update the line plots.
