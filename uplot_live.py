@@ -95,7 +95,6 @@ def main() -> None:
             ]
             options = deepcopy(handle.options)
             options["scales"]["y"]["range"] = [-1.2 - 0.001 * idx, 1.2 + 0.001 * idx]
-            handle.update_plot(list_aligned_data, options, aspect=0.25 + 0.001 * idx)
             handle.aligned_data = list_aligned_data
             # handle.options = options
             # handle.aspect = 0.5 + 0.2 * np.sin(0.005 * idx)
