@@ -45,7 +45,7 @@ def main() -> None:
     server = viser.ViserServer(port=8100)
 
     Ntrajs = 8
-    Nplots = 15
+    Nplots = 30
     time_step = 0.01
     Nhorizon = 150
     time_value = 0.0
@@ -114,11 +114,11 @@ def main() -> None:
             ]
             options = deepcopy(handle.options)
             options["scales"]["y"]["range"] = [-1.2 - 0.01 * idx, 1.2 + 0.01 * idx]
-            # handle.update_plot(list_aligned_data, options, aspect=0.25 + 0.001 * idx)
+            handle.update_plot(list_aligned_data, options, aspect=0.25 + 0.001 * idx)
             # handle.update_plot(list_aligned_data, options)
-            handle.aligned_data = list_aligned_data
+            # handle.aligned_data = list_aligned_data
             # handle.options = options
-            # handle.aspect = 0.5 + 0.01 * idx
+            # handle.aspect = 0.5 + 0.001 * idx
         time.sleep(time_step)
         time_value += time_step
         x_data = new_x_data
