@@ -9,14 +9,15 @@ import numpy as np
 import viser
 
 
-
 def y0(x: float | np.ndarray) -> float | np.ndarray:
     length = 1 if isinstance(x, float) else len(x)
     return np.sin(2 * np.pi * x) + 0.1 * np.random.randn(length)
 
+
 def y1(x: float | np.ndarray) -> float | np.ndarray:
     length = 1 if isinstance(x, float) else len(x)
     return -np.sin(2 * np.pi * x) + 0.1 * np.random.randn(length) + 1.0
+
 
 def main() -> None:
     server = viser.ViserServer(port=8100)
@@ -41,7 +42,7 @@ def main() -> None:
                 "label": "y1",
                 "stroke": "red",
                 "width": 2,
-            }
+            },
         ],
         "legend": {"show": True},
     }
@@ -72,5 +73,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
