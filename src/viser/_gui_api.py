@@ -433,9 +433,9 @@ class GuiApi:
         if brand_color is not None:
             assert len(brand_color) in (3, 10)
             if len(brand_color) == 3:
-                assert all(
-                    map(lambda val: isinstance(val, int), brand_color)
-                ), "All channels should be integers."
+                assert all(map(lambda val: isinstance(val, int), brand_color)), (
+                    "All channels should be integers."
+                )
 
                 # RGB => HLS.
                 h, l, s = colorsys.rgb_to_hls(
@@ -745,9 +745,9 @@ class GuiApi:
             plotly_path = (
                 Path(plotly.__file__).parent / "package_data" / "plotly.min.js"
             )
-            assert (
-                plotly_path.exists()
-            ), f"Could not find plotly.min.js at {plotly_path}."
+            assert plotly_path.exists(), (
+                f"Could not find plotly.min.js at {plotly_path}."
+            )
 
             # Send it over!
             plotly_js = plotly_path.read_text(encoding="utf-8")
@@ -795,14 +795,12 @@ class GuiApi:
     ) -> GuiUplotHandle:
         """Add a uPlot to the GUI. Requires the `uplot` package to be
         installed.
-
         Args:
             aligned_data: list of lists of floats, where the first inner list is the
                 x-data and the rest are the y-data, minimum outerlength 2.
             options: uPlot options including among others series, axes, scales but
                 excluding 'width', 'height' and 'cursor' which are handled on the
                 client side.
-
         Returns:
             A handle that can be used to interact with the GUI element.
         """
