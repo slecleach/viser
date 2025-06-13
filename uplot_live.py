@@ -9,26 +9,6 @@ import numpy as np
 
 import viser
 
-# handle the modal plot DONE
-# handle the main plot reanchoring DONE
-# handle multiple trajectories DONE
-# handles number of elements in history DONE
-# handle boundary ylims, xlims
-# rename functions DONE
-# plot multiple traj per plot DONE
-# check the effective refresh rate on the browser side DONE
-# make sure you're only updating a single plot by changing the x_data for one handle DONE
-# remove useless prints DONE
-# make sure you can scroll down to lower plots DONE
-# make sure you can enlarge the plot DONE
-# make sure you can hover over the plot DONE
-# remove legend and fix appearance [xlim, ylim, title, legend, line or area] DONE
-# pass options from python to the plot DONE
-# cursor focus https://leeoniya.github.io/uPlot/demos/focus-cursor.html DONE
-# create an alignedData class to ship the data with only one handle update DONE
-# remove _queue_update if possible DONE
-
-
 # investigate how to reduce the font size of the legend
 # add aspect ratio in the handle 0.5H
 # remove the dirty install of uplot and uplot_react
@@ -115,7 +95,7 @@ def main() -> None:
             ]
             options = deepcopy(handle.options)
             options["scales"]["y"]["range"] = [-1.2 - 0.001 * idx, 1.2 + 0.001 * idx]
-            # handle.update_plot(list_aligned_data, options, aspect=0.25 + 0.001 * idx)
+            handle.update_plot(list_aligned_data, options, aspect=0.25 + 0.001 * idx)
             handle.aligned_data = list_aligned_data
             # handle.options = options
             # handle.aspect = 0.5 + 0.2 * np.sin(0.005 * idx)
