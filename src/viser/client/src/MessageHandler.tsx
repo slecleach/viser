@@ -32,6 +32,9 @@ function useMessageHandler(): (message: Message) => void {
   const updateSceneNode = viewer.useSceneTree((state) => state.updateSceneNode);
   const removeSceneNode = viewer.useSceneTree((state) => state.removeSceneNode);
   const addSceneNode = viewer.useSceneTree((state) => state.addSceneNode);
+  const updateNodeAttributes = viewer.useSceneTree(
+    (state) => state.updateNodeAttributes,
+  );
   const setTheme = viewer.useGui((state) => state.setTheme);
   const setShareUrl = viewer.useGui((state) => state.setShareUrl);
   const addGui = viewer.useGui((state) => state.addGui);
@@ -46,10 +49,11 @@ function useMessageHandler(): (message: Message) => void {
   // frame if it doesn't exist yet.
   function addSceneNodeMakeParents(message: SceneNodeMessage) {
     // Make sure scene node is in attributes.
-    const attrs = viewerMutable.nodeAttributesFromName;
-    attrs[message.name] = {
-      overrideVisibility: attrs[message.name]?.overrideVisibility,
-    };
+    const currentAttrs =
+      viewer.useSceneTree.getState().nodeAttributesFromName[message.name];
+    updateNodeAttributes(message.name, {
+      overrideVisibility: currentAttrs?.overrideVisibility,
+    });
 
     // If the object is new or changed, we need to wait until it's created
     // before updating its pose. Updating the pose too early can cause
@@ -58,7 +62,12 @@ function useMessageHandler(): (message: Message) => void {
     const oldMessage =
       viewer.useSceneTree.getState().nodeFromName[message.name]?.message;
     if (oldMessage === undefined || message !== oldMessage) {
-      attrs[message.name]!.poseUpdateState = "waitForMakeObject";
+      const currentAttrs =
+        viewer.useSceneTree.getState().nodeAttributesFromName[message.name];
+      updateNodeAttributes(message.name, {
+        ...currentAttrs,
+        poseUpdateState: "waitForMakeObject",
+      });
     }
 
     // Make sure parents exists.
@@ -318,25 +327,43 @@ function useMessageHandler(): (message: Message) => void {
         return;
       }
       case "SetOrientationMessage": {
-        const attr = viewerMutable.nodeAttributesFromName;
-        if (attr[message.name] === undefined) attr[message.name] = {};
-        attr[message.name]!.wxyz = message.wxyz;
-        if (attr[message.name]!.poseUpdateState != "waitForMakeObject")
-          attr[message.name]!.poseUpdateState = "needsUpdate";
+        const currentAttrs =
+          viewer.useSceneTree.getState().nodeAttributesFromName[message.name] ||
+          {};
+        const newPoseUpdateState =
+          currentAttrs.poseUpdateState !== "waitForMakeObject"
+            ? "needsUpdate"
+            : currentAttrs.poseUpdateState;
+        updateNodeAttributes(message.name, {
+          ...currentAttrs,
+          wxyz: message.wxyz,
+          poseUpdateState: newPoseUpdateState,
+        });
         break;
       }
       case "SetPositionMessage": {
-        const attr = viewerMutable.nodeAttributesFromName;
-        if (attr[message.name] === undefined) attr[message.name] = {};
-        attr[message.name]!.position = message.position;
-        if (attr[message.name]!.poseUpdateState != "waitForMakeObject")
-          attr[message.name]!.poseUpdateState = "needsUpdate";
+        const currentAttrs =
+          viewer.useSceneTree.getState().nodeAttributesFromName[message.name] ||
+          {};
+        const newPoseUpdateState =
+          currentAttrs.poseUpdateState !== "waitForMakeObject"
+            ? "needsUpdate"
+            : currentAttrs.poseUpdateState;
+        updateNodeAttributes(message.name, {
+          ...currentAttrs,
+          position: message.position,
+          poseUpdateState: newPoseUpdateState,
+        });
         break;
       }
       case "SetSceneNodeVisibilityMessage": {
-        const attr = viewerMutable.nodeAttributesFromName;
-        if (attr[message.name] === undefined) attr[message.name] = {};
-        attr[message.name]!.visibility = message.visible;
+        const currentAttrs =
+          viewer.useSceneTree.getState().nodeAttributesFromName[message.name] ||
+          {};
+        updateNodeAttributes(message.name, {
+          ...currentAttrs,
+          visibility: message.visible,
+        });
         break;
       }
       // Add a background image.
@@ -397,8 +424,7 @@ function useMessageHandler(): (message: Message) => void {
           return;
         }
         removeSceneNode(message.name);
-        const attrs = viewerMutable.nodeAttributesFromName;
-        delete attrs[message.name];
+        updateNodeAttributes(message.name, undefined);
 
         if (viewerMutable.skinnedMeshState[message.name] !== undefined)
           delete viewerMutable.skinnedMeshState[message.name];
@@ -450,7 +476,7 @@ function useFileDownloadHandler(): (
     [uuid: string]: {
       metadata: FileTransferStartDownload;
       notificationId: string;
-      parts: Uint8Array[];
+      parts: FileTransferPart[];
       bytesDownloaded: number;
       displayFilesize: string;
     };
@@ -485,12 +511,10 @@ function useFileDownloadHandler(): (
       }
       case "FileTransferPart": {
         const downloadState = downloadStatesRef.current[message.transfer_uuid];
-        if (message.part != downloadState.parts.length) {
-          console.error(
-            "A file download message was dropped; this should never happen!",
-          );
+        if (message.part_index != downloadState.parts.length) {
+          console.error("A file download message was received out of order!");
         }
-        downloadState.parts.push(message.content);
+        downloadState.parts.push(message);
         downloadState.bytesDownloaded += message.content.length;
         break;
       }
@@ -521,9 +545,15 @@ function useFileDownloadHandler(): (
     // If done: download file and clear state.
     if (isDone) {
       const url = window.URL.createObjectURL(
-        new Blob(downloadState.parts, {
-          type: downloadState.metadata.mime_type,
-        }),
+        new Blob(
+          // Blob contains the file part contents, sorted by the part index.
+          downloadState.parts
+            .sort((a, b) => a.part_index - b.part_index)
+            .map((part) => part.content),
+          {
+            type: downloadState.metadata.mime_type,
+          },
+        ),
       );
 
       // If save_immediately is true, download the file immediately.

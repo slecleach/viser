@@ -320,7 +320,7 @@ class GuiApi:
         assert message.source_component_uuid in self._gui_input_handle_from_uuid
 
         state = self._current_file_upload_states[message.transfer_uuid]
-        state["parts"][message.part] = message.content
+        state["parts"][message.part_index] = message.content
         total_bytes = state["total_bytes"]
 
         with state["lock"]:
@@ -461,7 +461,7 @@ class GuiApi:
                 )
                 colors_cast = cast(
                     LengthTenStrTuple,
-                    tuple(_hex_from_hls(h, ls[i], s) for i in range(10)),
+                    tuple(_hex_from_hls(h, float(ls[i]), s) for i in range(10)),
                 )
 
         assert colors_cast is None or all(
