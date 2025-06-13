@@ -16,11 +16,6 @@ import viser
 # clean up the code 1H
 
 
-# GuiUplotHandle
-# GuiUplotMessage
-# GuiUplotProps
-
-
 def main() -> None:
     server = viser.ViserServer(port=8100)
 
