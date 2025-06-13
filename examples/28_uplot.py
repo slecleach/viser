@@ -15,8 +15,7 @@ def y0(x: float | np.ndarray) -> float | np.ndarray:
 
 
 def y1(x: float | np.ndarray) -> float | np.ndarray:
-    length = 1 if isinstance(x, float) else len(x)
-    return -np.sin(2 * np.pi * x) + 0.1 * np.random.randn(length) + 1.0
+    return -y0(x) + 1.0
 
 
 def main() -> None:
@@ -47,14 +46,14 @@ def main() -> None:
         "legend": {"show": True},
     }
 
-    current_time = 0.0
-    horizon = 100
     time_step = 1.0 / 60.0
-    x_data = current_time + time_step * np.arange(horizon)
+    x_data = time_step * np.arange(100)
     y0_data = y0(x_data)
     y1_data = y1(x_data)
     aligned_data = np.vstack((x_data, y0_data, y1_data))
 
+    print("aligned_data.shape", aligned_data.shape)
+    print("aligned_data", aligned_data)
     uplot_handle = server.gui.add_uplot(
         aligned_data=aligned_data,
         options=options,

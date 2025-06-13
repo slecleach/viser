@@ -811,11 +811,15 @@ class GuiApi:
         assert aligned_data.ndim == 2, "aligned_data must be a 2D array"
         assert aligned_data.shape[0] >= 2, "aligned_data must have at least 2 rows"
 
+        list_aligned_data = [
+            [float(e) for e in aligned_data[i]] for i in range(aligned_data.shape[0])
+        ]
+
         message = _messages.GuiUplotMessage(
             uuid=_make_uuid(),
             container_uuid=self._get_container_uuid(),
             props=_messages.GuiUplotProps(
-                aligned_data=aligned_data,
+                aligned_data=list_aligned_data,
                 options=options,
                 aspect=aspect,
             ),
