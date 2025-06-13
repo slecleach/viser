@@ -113,9 +113,12 @@ def main() -> None:
                 [float(y) for y in aligned_data[i]] for i in range(Ntrajs + 1)
             ]
             options = deepcopy(handle.options)
-            # handle.set_data_and_options(list_aligned_data, options)
+            options["scales"]["y"]["range"] = [-1.2 - 0.01 * idx, 1.2 + 0.01 * idx]
+            # handle.update_plot(list_aligned_data, options, aspect=0.25 + 0.001 * idx)
+            # handle.update_plot(list_aligned_data, options)
             handle.aligned_data = list_aligned_data
             # handle.options = options
+            # handle.aspect = 0.5 + 0.01 * idx
         time.sleep(time_step)
         time_value += time_step
         x_data = new_x_data

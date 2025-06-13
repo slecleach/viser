@@ -791,11 +791,12 @@ class GuiUplotHandle(_GuiHandle[None], GuiUplotProps):
         _impl: _GuiHandleState,
         _aligned_data: list[list[float]],
         _options: dict[str, Any],
+        _aspect: float,
     ):
         super().__init__(_impl=_impl)
         self._aligned_data = _aligned_data
         self._options = _options
-
+        self._aspect = _aspect
     @property
     def aligned_data(self) -> list[list[float]]:
         """Current aligned data of this Uplot element. Synchronized automatically when assigned."""
@@ -818,22 +819,33 @@ class GuiUplotHandle(_GuiHandle[None], GuiUplotProps):
         self._options = options
         self._queue_update("options", options)
 
-    def set_data_and_options(
-        self, aligned_data: list[list[float]], options: dict[str, Any]
+    @property
+    def aspect(self) -> float:
+        """Current aspect ratio of this Uplot element. Synchronized automatically when assigned."""
+        assert self._aspect is not None
+        return self._aspect
+    
+    @aspect.setter
+    def aspect(self, aspect: float) -> None:
+        self._aspect = aspect
+        self._queue_update("aspect", aspect)
+
+    def update_plot(
+        self, aligned_data: list[list[float]], options: dict[str, Any], aspect: float = 1.0,
     ) -> None:
-        """Set both the aligned data and options at once, triggering only one client-side update.
-        This is more efficient than setting aligned data and options individually. 
-        Updating options frequently is discouraged, as it triggers a full re-render of the Uplot figure.
+        """Update the plot's data, options and aspect ratio in a single client-side update.
 
         Args:
             aligned_data: The new aligned data to set
             options: The new options to set
+            aspect: The new aspect ratio to set
         """
         self._aligned_data = aligned_data
         self._options = options
+        self._aspect = aspect   
         self._impl.gui_api._websock_interface.queue_message(
             GuiUpdateMessage(
-                self._impl.uuid, {"aligned_data": aligned_data, "options": options}
+                self._impl.uuid, {"aligned_data": aligned_data, "options": options, "aspect": aspect}
             )
         )
 

@@ -792,6 +792,7 @@ class GuiApi:
         self,
         aligned_data: list[list[float]],
         options: dict[str, Any],
+        aspect: float = 1.0,
     ) -> GuiUplotHandle:
         """Add a uPlot to the GUI. Requires the `uplot` package to be
         installed.
@@ -801,6 +802,7 @@ class GuiApi:
             options: uPlot options as a dictionary, including among others keys:
                 'series', 'axes', 'scales' but excluding 'width', 'height' and 'cursor'
                 which are handled on the client side.
+            aspect: Aspect ratio of the plot in the control panel (height/width).
         Returns:
             A handle that can be used to interact with the GUI element.
         """
@@ -811,6 +813,7 @@ class GuiApi:
             props=_messages.GuiUplotProps(
                 aligned_data=aligned_data,
                 options=options,
+                aspect=aspect,
             ),
         )
         self._websock_interface.queue_message(message)
@@ -825,6 +828,7 @@ class GuiApi:
             ),
             _aligned_data=aligned_data,
             _options=options,
+            _aspect=aspect,
         )
 
         return handle

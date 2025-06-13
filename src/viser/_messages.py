@@ -1092,6 +1092,8 @@ class GuiUplotProps:
     minimum outerlength 2. Synchronized automatically when assigned."""
     options: dict[str, Any]
     """uPlot options as a dictionary. Synchronized automatically when assigned."""
+    aspect: float
+    """Aspect ratio of the plot in the control panel (height/width). Synchronized automatically when assigned."""
 
 
 @dataclasses.dataclass

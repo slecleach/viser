@@ -12,13 +12,13 @@ import { folderWrapper } from "./Folder.css";
 const PlotData = React.memo(function PlotData({
   data,
   options,
+  aspectRatio,
   isVisible = true,
-  aspectRatio = 0.6,
 }: {
   data: number[][]; // managed by React
   options: { [key: string]: any };  // Equivalent to Python's dict[str, Any]
-  isVisible?: boolean;
   aspectRatio?: number;
+  isVisible?: boolean;
 }) {
   // Box size change -> width value change -> plot rerender trigger.
   const { ref: containerSizeRef, width: containerWidth } = useElementSize();
@@ -74,7 +74,7 @@ const PlotData = React.memo(function PlotData({
     if (containerWidth > 0) {
       setOptions(getOptions(containerWidth));
     }
-  }, [containerWidth, options]);
+  }, [containerWidth, options, aspectRatio]);
 
   return (
     <Paper
@@ -96,7 +96,7 @@ const PlotData = React.memo(function PlotData({
 });
 
 export default function UplotComponent({
-  props: { aligned_data, options },
+  props: { aligned_data, options, aspect },
 }: GuiUplotMessage) {
 
   // Create a modal with the plot, and a button to open it.
@@ -110,11 +110,17 @@ export default function UplotComponent({
 
   // Data state managed by React
   const [data, setData] = useState<uPlot.AlignedData>(alignedData);
+  // const [aspectRatio, setAspectRatio] = useState(aspect);
 
   // Update data state when inputs change
   useEffect(() => {
     setData(alignedData);
   }, [alignedData]);
+
+  // // Update aspect state when inputs change
+  // useEffect(() => {
+  //   setAspectRatio(aspect);
+  // }, [aspect]);
 
   return (
     <Box>
@@ -123,8 +129,8 @@ export default function UplotComponent({
           <PlotData
             data={data}
             options={options}
+            aspectRatio={aspect}
             isVisible={true}
-            aspectRatio={0.6}
           />
         </Box>
       </Tooltip.Floating>
@@ -133,8 +139,8 @@ export default function UplotComponent({
         <PlotData
           data={data}
           options={options}
+          aspectRatio={aspect}
           isVisible={opened}
-          aspectRatio={0.6}
         />
       </Modal>
     </Box>

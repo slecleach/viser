@@ -521,7 +521,11 @@ export interface GuiUplotMessage {
   type: "GuiUplotMessage";
   uuid: string;
   container_uuid: string;
-  props: { aligned_data: number[][]; options: { [key: string]: any } };
+  props: {
+    aligned_data: number[][];
+    options: { [key: string]: any };
+    aspect: number;
+  };
 }
 /** GuiImageMessage(uuid: 'str', container_uuid: 'str', props: 'GuiImageProps')
  *
