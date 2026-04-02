@@ -32,9 +32,9 @@ export class CSM {
   customSplitsCallback?: (cascades: number, near: number, far: number, breaks: number[]) => void;
   fade: boolean;
   lights: DirectionalLight[];
-  
+
   constructor(data: CSMParameters);
-  
+
   update(): void;
   updateFrustums(): void;
   remove(): void;

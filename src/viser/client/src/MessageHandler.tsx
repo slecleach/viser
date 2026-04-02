@@ -442,6 +442,7 @@ function useMessageHandler(): (message: Message) => void {
         updateGuiProps(message.uuid, message.updates);
         return;
       }
+
       // Remove a GUI input.
       case "GuiRemoveMessage": {
         removeGui(message.uuid);

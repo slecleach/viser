@@ -16,7 +16,7 @@ import RgbComponent from "../components/Rgb";
 import RgbaComponent from "../components/Rgba";
 import ButtonGroupComponent from "../components/ButtonGroup";
 import MarkdownComponent from "../components/Markdown";
-import PlotlyComponent from "../components/PlotlyComponent";
+import PlotlyComponent, { PlotlyExtendTracesComponent } from "../components/PlotlyComponent";
 import TabGroupComponent from "../components/TabGroup";
 import FolderComponent from "../components/Folder";
 import MultiSliderComponent from "../components/MultiSlider";
@@ -95,6 +95,12 @@ function GeneratedInput(props: { guiUuid: string }) {
     console.error("Tried to render non-existent component", props.guiUuid);
     return null;
   }
+
+  // console.log("%c[GeneratedInput] Rendering component", "color: #2196F3; font-weight: bold", {
+  //   type: conf.type,
+  //   uuid: props.guiUuid
+  // });
+
   switch (conf.type) {
     case "GuiFolderMessage":
       return <FolderComponent {...conf} />;
@@ -106,6 +112,8 @@ function GeneratedInput(props: { guiUuid: string }) {
       return <HtmlComponent {...conf} />;
     case "GuiPlotlyMessage":
       return <PlotlyComponent {...conf} />;
+    case "GuiPlotlyExtendTracesMessage":
+      return <PlotlyExtendTracesComponent {...conf} />;
     case "GuiImageMessage":
       return <ImageComponent {...conf} />;
     case "GuiButtonMessage":

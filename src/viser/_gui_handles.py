@@ -779,6 +779,7 @@ class GuiPlotlyHandle(_GuiHandle[None], GuiPlotlyProps):
 
         json_str = figure.to_json()
         assert isinstance(json_str, str)
+        # print(json_str)
         self._plotly_json_str = json_str
 
 
